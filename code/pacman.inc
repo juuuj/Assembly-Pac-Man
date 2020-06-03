@@ -42,7 +42,7 @@ gameObject struct
 gameObject ends
 
 player struct
-    playerObj       gameObject <> ;como faz isso??
+    playerObj       gameObject <>
     stopped               BYTE 0
     life                  BYTE 4
     direction             BYTE 0
