@@ -53,8 +53,9 @@ ghost struct
     afraid            BYTE  0
     alive             BYTE  1
     direction         BYTE  0    
-ghost ends                                                      
+ghost ends                    
                       
+;provavelmente vai ter q ter um struct pro tile de parede
 
 
 .CONST
