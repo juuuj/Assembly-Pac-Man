@@ -356,18 +356,6 @@ updateScreen proc
 
     invoke SelectObject, hMemDC, hBitmap
 
-    ;invoke wsprintf, ADDR buffer, ADDR test_header_format, h_V1_top_left
-    ;invoke MessageBox, NULL, ADDR buffer, ADDR msgBoxTitle, MB_OKCANCEL
-
-    ;invoke SelectObject, hMemDC, h_V1_top_left
-    ;invoke TransparentBlt, hDC, 0, 0,\
-    ;    50, 50, hMemDC,\    
- 
-    ;    0, 0, 50, 50, 16777215
-;if gamestate == 0
-;    invoke paintSplashScreen
-;elseif gamestate == 1
-
     invoke paintBackground, hDC, hMemDC, hMemDC2
 
     .if GAMESTATE == 2
@@ -432,50 +420,6 @@ movePlayer endp
 
 ;______________________________________________________________________________
 
-;dashPlayer proc addrPlayer:dword
-;assume eax:ptr player
-;    mov eax, addrPlayer
-;    mov edx, DASH_DISTANCE
-;
-;    mov [eax].stopped, 0
-;    mov [eax].dashsequence, 6
-;
-;    .if [eax].direction == D_TOP_LEFT
-;        mov [eax].playerObj.speed.x, -DASH_SPEED
-;        mov [eax].playerObj.speed.y, -DASH_SPEED
-;
-;    .elseif [eax].direction == D_TOP
-;        mov [eax].playerObj.speed.y, -DASH_SPEED
-;
-;    .elseif [eax].direction == D_TOP_RIGHT
-;        mov [eax].playerObj.speed.x,  DASH_SPEED
-;        mov [eax].playerObj.speed.y, -DASH_SPEED
-;
-;    .elseif [eax].direction == D_RIGHT
-;        mov [eax].playerObj.speed.x,  DASH_SPEED
-;
-;    .elseif [eax].direction == D_DOWN_RIGHT
-;        mov [eax].playerObj.speed.x,  DASH_SPEED
-;        mov [eax].playerObj.speed.y,  DASH_SPEED
-;
-;    .elseif [eax].direction == D_DOWN
-;        mov [eax].playerObj.speed.y,  DASH_SPEED
-;
- ;   .elseif [eax].direction == D_DOWN_LEFT
-  ;      mov [eax].playerObj.speed.x, -DASH_SPEED
-   ;     mov [eax].playerObj.speed.y,  DASH_SPEED
-;
- ;   .elseif [eax].direction == D_LEFT
-  ;      mov [eax].playerObj.speed.x,  -DASH_SPEED
- ;   .endif
-;
- ;   mov [eax].cooldownDash, 0
-;
- ;   ret
-;dashPlayer endp
-
-;______________________________________________________________________________
-
 
 updateDirection proc addrPlayer:dword     ; updates direction based on players axis's speed
 assume eax:ptr player
@@ -512,9 +456,6 @@ moveGhost proc uses eax addrGhost:dword               ; updates a gameObject pos
     mov ebx, [eax].ghostObj.speed.x
     mov ecx, [eax].ghostObj.speed.y
 
-    ;mov [eax].onGround, 0
-    ;.if [eax].remainingDistance > 0
-
         .if [eax].direction == D_TOP
             add [eax].ghostObj.pos.y, -GHOST_SPEED
             sub [eax].remainingDistance, GHOST_SPEED
@@ -531,9 +472,6 @@ moveGhost proc uses eax addrGhost:dword               ; updates a gameObject pos
             add [eax].ghostObj.pos.x,  -GHOST_SPEED
             sub [eax].remainingDistance, GHOST_SPEED
         .endif
-    ;.else
-        ;mov [eax].onGround, 1 
-    ;.endif
     assume eax:nothing
     ret
 moveGhost endp
@@ -633,11 +571,6 @@ gameManager proc p:dword
         .while GAMESTATE == 2
             invoke Sleep, 30
 
-            ;invoke isColliding, player1.playerObj.pos, player2.playerObj.pos, PLAYER_SIZE_POS_S, PLAYER_SIZE_POS_S
-            ;.if edx == TRUE
-            ;    invoke wsprintf, ADDR buffer, ADDR test_header_format, edx
-            ;    invoke MessageBox, NULL, ADDR buffer, ADDR msgBoxTitle, MB_OKCANCEL
-            ;.endif
             invoke isColliding, player.playerObj.pos, ghost1.ghostObj.pos, PLAYER_SIZE_POINT, GHOST_SIZE_POINT
             .if edx == TRUE
                 .if ghost1.afraid == 0
@@ -660,11 +593,6 @@ gameManager proc p:dword
             .endif
 
             ;TODO: Colisão entre pac e fantasma com a parede
-
-
-            ; ----- PLAYER 1 WALKING SEQUENCE ------
-
-            ;animação, gl
 
         .while GAMESTATE == 3 || GAMESTATE == 4
             invoke Sleep, 30
