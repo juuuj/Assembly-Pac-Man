@@ -53,7 +53,11 @@ ghost struct
     afraid            BYTE  0
     alive             BYTE  1
     direction         BYTE  0    
-ghost ends                    
+ghost ends                 
+
+wall struct
+    wallObj         gameObject<>
+wall ends
                       
 ;provavelmente vai ter q ter um struct pro tile de parede
 
@@ -73,7 +77,7 @@ ghost ends
     GHOST_SIZE       EQU 32
     GHOST_HALF_SIZE EQU GHOST_SIZE / 2
 
-    HEART_SIZE    EQU 32
+    LIFE_SIZE    EQU 32
 
     PLAYER_SPEED  EQU 6
     GHOST_SPEED   EQU 6
@@ -90,7 +94,7 @@ ghost ends
 
     ;Background bitmap:
     h_background        dd 0
-    h_enterprise        dd 0
+    h_loading           dd 0
     h_menu              dd 0
 
     ; Player 1 spritesheet
@@ -110,10 +114,13 @@ ghost ends
     G4      dd 0
 
     ;Player won
-    p_won            dd 0
+    p_won           dd 0
+
+    ;Game over
+    game_over       dd 0
 
     ;Heart Bitmap:
-    HT_heart1         dd 0
+    ;HT_heart         dd 0
 
     test_header_format  db  "A: %d",13,10,0
     buffer              db 256 dup(?)
@@ -124,11 +131,13 @@ ghost ends
     ; Players
     player player <<<100,450>,  <0,0>>, 0, 4, D_RIGHT>  ; dash initialized as 8 because 0 to 7 are directions, so 8 is the same as null 
 
-    ;;TODO: inicializacao dos fantasmas
+    ; Fantasma
     ghost1 ghost <<<100,350>,  <0,0>>, 0, 1, D_RIGHT>
     ghost2 ghost <<<200,350>,  <0,0>>, 0, 1, D_RIGHT>
     ghost3 ghost <<<300,350>,  <0,0>>, 0, 1, D_RIGHT>
     ghost4 ghost <<<400,350>,  <0,0>>, 0, 1, D_RIGHT>
+
+    wall1 wall  <<<16, 16>, <0,0>>>
     
     RIGHTARROW            BYTE 0
     

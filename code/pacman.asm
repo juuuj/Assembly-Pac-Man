@@ -20,11 +20,6 @@ CommandLine LPSTR ?
 .CODE                ; Here begins our code 
 start: 
 
-
- ;   invoke LoadLibrary,addr Libname         ; splash screen reasons 
- ;       .if eax!=NULL 
- ;           invoke FreeLibrary,eax 
- ;       .endif
     invoke GetModuleHandle, NULL            ; get the instance handle of our program. 
                                             ; Under Win32, hmodule==hinstance mov hInstance,eax 
     mov hInstance,eax 
@@ -40,16 +35,6 @@ start:
 ; _ PROCEDURES ___________________________________________________________________________
 
 loadImages proc                                                 
-
-    ;Loading background bitmap
-    invoke LoadBitmap, hInstance, 169 ;TODO: fazer as imagens
-    mov h_background, eax
-
-    invoke LoadBitmap, hInstance, 170 ;TODO: fazer as imagens
-    mov h_enterprise, eax
-
-    invoke LoadBitmap, hInstance, 171 ;TODO: fazer as imagens
-    mov h_menu, eax
 
     ;Loading Ghosts' Bitmaps:
     invoke LoadBitmap, hInstance, 100
@@ -69,17 +54,25 @@ loadImages proc
     invoke LoadBitmap, hInstance, 106
     mov P2, eax
 
+    ;Loading background bitmap
+    invoke LoadBitmap, hInstance, 107
+    mov h_background, eax
+    invoke LoadBitmap, hInstance, 108
+    mov h_loading, eax
+    invoke LoadBitmap, hInstance, 109
+    mov h_menu, eax
+
     ;Loading winner's Bitmaps:
-    invoke LoadBitmap, hInstance, 300
-    mov p1_won, eax
-    invoke LoadBitmap, hInstance, 301
-    mov p2_won, eax
+    invoke LoadBitmap, hInstance, 110
+    mov p_won, eax
 
     ;Loading Heart Bitmaps:
-    invoke LoadBitmap, hInstance, 200
-    mov HT_heart1, eax
-    invoke LoadBitmap, hInstance, 201
-    mov HT_heart2, eax
+    ;invoke LoadBitmap, hInstance, 200
+    ;mov HT_heart, eax
+
+    ;Game over bitmap:
+    invoke LoadBitmap, hInstance, 111
+    mov game_over, eax
 
     ret
 loadImages endp
@@ -148,7 +141,7 @@ isStopped endp
 paintBackground proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
 
 .if GAMESTATE == 0
-    invoke SelectObject, _hMemDC2, h_enterprise
+    invoke SelectObject, _hMemDC2, h_loading
     invoke BitBlt, _hMemDC, 0, 0, 1200, 800, _hMemDC2, 0, 0, SRCCOPY
 .endif
 
@@ -163,12 +156,12 @@ paintBackground proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
 .endif
 
 .if GAMESTATE == 3 ; player 1 won
-    invoke SelectObject, _hMemDC2, p1_won
+    invoke SelectObject, _hMemDC2, game_over
     invoke BitBlt, _hMemDC, 0, 0, 1200, 800, _hMemDC2, 0, 0, SRCCOPY
 .endif
 
 .if GAMESTATE == 4 ; player 2 won
-    invoke SelectObject, _hMemDC2, p2_won
+    invoke SelectObject, _hMemDC2, p_won
     invoke BitBlt, _hMemDC, 0, 0, 1200, 800, _hMemDC2, 0, 0, SRCCOPY
 .endif
 
@@ -177,70 +170,38 @@ paintBackground endp
 
 ;______________________________________________________________________________
 
-paintHearts proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
+paintLifes proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
     ; PLAYER 1
-    invoke SelectObject, _hMemDC2, HT_heart1
+    invoke SelectObject, _hMemDC2, P1 ;a vida tem a imagem do pac man
     mov ebx, 0
     movzx ecx, player.life
     .while ebx != ecx
-        mov eax, HEART_SIZE
+        mov eax, LIFE_SIZE
         mul ebx
         push ecx
         invoke TransparentBlt, _hMemDC, eax, 0,\
-                HEART_SIZE, HEART_SIZE, _hMemDC2,\
-                0, 0, HEART_SIZE, HEART_SIZE, 16777215
+                LIFE_SIZE, LIFE_SIZE, _hMemDC2,\
+                0, 0, LIFE_SIZE, LIFE_SIZE, 16777215
         ;invoke BitBlt, _hdc, eax, 0, HEART_SIZE, HEART_SIZE, _hMemDC, 0, 0, SRCCOPY 
         pop ecx
         inc ebx
     .endw
 
-    ; PLAYER 2
-    ;invoke SelectObject, _hMemDC2, HT_heart2
-    ;;mov ebx, 1
-    ;movzx ecx, player2.life
-    ;inc ecx
-    ;.while ebx != ecx
-    ;    mov eax, HEART_SIZE
-    ;    mul ebx
-    ;    push ecx
-    ;    mov edx, WINDOW_SIZE_X
-    ;    sub edx, eax
-    ;    invoke TransparentBlt, _hMemDC, edx, 0,\
-    ;            HEART_SIZE, HEART_SIZE, _hMemDC2,\
-    ;            0, 0, HEART_SIZE, HEART_SIZE, 16777215
-    ;    pop ecx
-    ;    inc ebx
-    ;.endw
-
     ret
-paintHearts endp
+paintLifes endp
 ;______________________________________________________________________________
 
 paintPlayers proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
 
    ;PLAYER 1___________________________________________
-        invoke SelectObject, _hMemDC2, p1_spritesheet
+        invoke SelectObject, _hMemDC2, P1
 
-        movsx eax, player1.direction
+        movsx eax, player.direction
         mov ebx, PLAYER_SIZE
         mul ebx
         mov ecx, eax
 
-        invoke isStopped, addr player1
-
-        ;.if player1.stopped == 1
-        ;    mov edx, 0
-        ;.if player1.dashsequence == 0
-        ;    movsx eax, player1.walksequence
-        ;    mov ebx, PLAYER_SIZE               ; se for mudar hitbox, essa e a largura
-        ;    mul ebx
-        ;    mov edx, eax
-        ;.else
-        ;    movsx eax, player1.dashsequence
-        ;    mov ebx, PLAYER_SIZE               ; se for mudar hitbox, essa e a largura
-        ;    mul ebx
-        ;    mov edx, eax
-        ;.endif
+        invoke isStopped, addr player
 
     ;________PLAYER 1 PAINTING________________________________________________________________________
 
@@ -264,10 +225,7 @@ paintGhosts proc _hdc:HDC, _hMemDC:HDC, _hMemDC2
     ;________GHOST 1 PAINTING_____________________________________________________________
 
         .if ghost1.afraid == 1 
-            ;invoke wsprintf, ADDR buffer, ADDR test_header_format, 0
-            ;invoke MessageBox, NULL, ADDR buffer, ADDR msgBoxTitle, MB_OKCANCEL
             invoke SelectObject, _hMemDC2, G0
-            ;invoke SelectObject, _hMemDC, A1_left
         .else
             invoke SelectObject, _hMemDC2, G1
         .endif
@@ -280,7 +238,6 @@ paintGhosts proc _hdc:HDC, _hMemDC:HDC, _hMemDC2
         invoke TransparentBlt, _hMemDC, eax, ebx,\
             GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, _hMemDC2,\
             0, 0, GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, 16777215
-        ;invoke BitBlt, _hdc, eax, ebx, ARROW_SIZE_POINT.x, ARROW_SIZE_POINT.y, _hMemDC, 0, 0, SRCCOPY 
 
 
 ;________GHOST 2 PAINTING_____________________________________________________________
@@ -361,7 +318,7 @@ updateScreen proc
     .if GAMESTATE == 2
         invoke paintPlayer, hDC, hMemDC, hMemDC2
         invoke paintGhosts, hDC, hMemDC, hMemDC2
-        invoke paintHearts, hDC, hMemDC, hMemDC2
+        invoke paintLifes, hDC, hMemDC, hMemDC2
     .endif
 
     invoke BitBlt, hDC, 0, 0, WINDOW_SIZE_X, WINDOW_SIZE_Y, hMemDC, 0, 0, SRCCOPY
@@ -780,7 +737,7 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
         .endif
 
         .if direction != -1
-            invoke changePlayerSpeed, ADDR player1, direction, keydown
+            invoke changePlayerSpeed, ADDR player, direction, keydown
             mov direction, -1
             mov keydown, -1
         .endif
@@ -819,7 +776,7 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
         .endif
 
         .if direction != -1
-            invoke changePlayerSpeed, ADDR player1, direction, keydown
+            invoke changePlayerSpeed, ADDR player, direction, keydown
             mov direction, -1
             mov keydown, -1
         .endif
