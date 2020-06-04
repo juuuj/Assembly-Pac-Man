@@ -42,7 +42,7 @@ gameObject struct
 gameObject ends
 
 player struct
-    playerObj       gameObject <> ;como faz isso??
+    playerObj       gameObject <>
     stopped               BYTE 0
     life                  BYTE 4
     direction             BYTE 0
@@ -53,8 +53,9 @@ ghost struct
     afraid            BYTE  0
     alive             BYTE  1
     direction         BYTE  0    
-ghost ends                                                      
+ghost ends                    
                       
+;provavelmente vai ter q ter um struct pro tile de parede
 
 
 .CONST
@@ -121,7 +122,7 @@ ghost ends
     over byte 0                                ; control game state (occuring or terminated)
 
     ; Players
-    player player <<<100,350>,  <0,0>>, 0, 4, D_RIGHT>  ; dash initialized as 8 because 0 to 7 are directions, so 8 is the same as null 
+    player player <<<100,450>,  <0,0>>, 0, 4, D_RIGHT>  ; dash initialized as 8 because 0 to 7 are directions, so 8 is the same as null 
 
     ;;TODO: inicializacao dos fantasmas
     ghost1 ghost <<<100,350>,  <0,0>>, 0, 1, D_RIGHT>
