@@ -31,16 +31,19 @@ includelib \masm32\lib\msimg32.lib
 ;includelib C:\masm32\lib\shell32.lib
 ;includelib C:\masm32\lib\msimg32.lib
 
+;struct que é usada para definir coisas com x e y (posição e velocidade)
 point struct 
     x dd 0      
     y dd 0
 point ends
 
+;atributos que todo objeto tem, serve como uma classe mãe
 gameObject struct
     pos      point <>
-    speed    point <> ; horizontal and vertical speeds
+    speed    point <>
 gameObject ends
 
+;classe do player
 player struct
     playerObj       gameObject <>
     stopped               BYTE 0
@@ -48,6 +51,7 @@ player struct
     direction             BYTE 0
 player ends
 
+;fantasma
 ghost struct
     ghostObj          gameObject <>
     afraid            BYTE  0
@@ -55,22 +59,25 @@ ghost struct
     direction         BYTE  0    
 ghost ends                 
 
+;parede
 wall struct
     wallObj         gameObject<>
 wall ends
-                      
-;provavelmente vai ter q ter um struct pro tile de parede
+                    
 
 
 .CONST
+    ;tamanho da janela
     WINDOW_SIZE_X EQU 800
     WINDOW_SIZE_Y EQU 600
 
+    ;define as direções, pra poder entender o código mais fácilmente nessa linguagem porca
     D_RIGHT       EQU 0 
     D_TOP         EQU 1  
     D_LEFT        EQU 2     
     D_DOWN        EQU 3
 
+    ;tamanhos de cada objeto:
     PLAYER_SIZE      EQU 32
     PLAYER_HALF_SIZE EQU PLAYER_SIZE / 2
 
@@ -78,6 +85,8 @@ wall ends
     GHOST_HALF_SIZE EQU GHOST_SIZE / 2
 
     LIFE_SIZE    EQU 32
+
+    WALL_SIZE EQU 16 ;tem q testar e talvez mudar dps
 
     PLAYER_SPEED  EQU 6
     GHOST_SPEED   EQU 6
@@ -92,51 +101,36 @@ wall ends
     PLAYER_SIZE_POINT  point <32,32>
     GHOST_SIZE_POINT   point<32,32>
 
-    ;Background bitmap:
+    ;inicializando as variáveis que vão guardar as imagens (vazias por enquanto):
     h_background        dd 0
     h_loading           dd 0
     h_menu              dd 0
-
-    ; Player 1 spritesheet
-    ;p1_spritesheet    dd 0
-    ; Ghost spritesheet
-    ;ghost_spritesheet dd 0
-
-    ;Pacman Bitmaps:
-    P1    dd 0
-    P2    dd 0
-
-    ;Ghost Bitmaps:
+    P1      dd 0
+    P2      dd 0
     G0      dd 0
     G1      dd 0
     G2      dd 0
     G3      dd 0
     G4      dd 0
-
-    ;Player won
-    p_won           dd 0
-
-    ;Game over
-    game_over       dd 0
-
-    ;Heart Bitmap:
-    ;HT_heart         dd 0
+    p_won               dd 0
+    game_over           dd 0
 
     test_header_format  db  "A: %d",13,10,0
     buffer              db 256 dup(?)
     msgBoxTitle         db "Testing",0
 
-    over byte 0                                ; control game state (occuring or terminated)
+    over byte 0 ;
 
-    ; Player
+    ;instancia o player
     player player <<<100,450>,  <0,0>>, 0, 4, D_RIGHT> 
 
-    ; Fantasma
+    ;instancia os fantasmas
     ghost1 ghost <<<100,350>,  <0,0>>, 0, 1, D_RIGHT>
     ghost2 ghost <<<200,350>,  <0,0>>, 0, 1, D_RIGHT>
     ghost3 ghost <<<300,350>,  <0,0>>, 0, 1, D_RIGHT>
     ghost4 ghost <<<400,350>,  <0,0>>, 0, 1, D_RIGHT>
 
+    ;instancia as paredes
     wall1 wall  <<<16, 16>, <0,0>>>
     
     RIGHTARROW            BYTE 0

@@ -36,7 +36,7 @@ start:
 
 loadImages proc                                                 
 
-    ;Loading Ghosts' Bitmaps:
+    ;Carregando as imagens dos fantasmas:
     invoke LoadBitmap, hInstance, 100
     mov G0, eax
     invoke LoadBitmap, hInstance, 101
@@ -48,13 +48,13 @@ loadImages proc
     invoke LoadBitmap, hInstance, 104
     mov G4, eax
 
-    ;Loading Player's Bitmaps:
+    ;Carregando as imagens do player:
     invoke LoadBitmap, hInstance, 105
     mov P1, eax
     invoke LoadBitmap, hInstance, 106
     mov P2, eax
 
-    ;Loading background bitmap
+    ;Imagens de background, carregamento e menu:
     invoke LoadBitmap, hInstance, 107
     mov h_background, eax
     invoke LoadBitmap, hInstance, 108
@@ -62,15 +62,9 @@ loadImages proc
     invoke LoadBitmap, hInstance, 109
     mov h_menu, eax
 
-    ;Loading winner's Bitmaps:
+    ;Imagens de vitória e derrota:
     invoke LoadBitmap, hInstance, 110
     mov p_won, eax
-
-    ;Loading Heart Bitmaps:
-    ;invoke LoadBitmap, hInstance, 200
-    ;mov HT_heart, eax
-
-    ;Game over bitmap:
     invoke LoadBitmap, hInstance, 111
     mov game_over, eax
 
@@ -78,34 +72,24 @@ loadImages proc
 loadImages endp
 
 ;______________________________________________________________________________
-
+;Função para saber se objetos estão colidindo, guarda no edx
 isColliding proc obj1Pos:point, obj2Pos:point, obj1Size:point, obj2Size:point
-
-    ;.if obj1Pos.x < obj2Pos.x + obj2Size.x && \
-    ;    obj1Pos.x + obj1Size.x > obj2Pos.x && \
-    ;    obj1Pos.y < obj2Pos.y + obj2Size.y && \
-    ;    obj1Pos.y + obj1Size.y > obj2Pos.y
-    ;    mov eax, TRUE
-    ;.else
-    ;    mov eax, FALSE
-    ;.endif
     
     push eax
     push ebx
 
     mov eax, obj1Pos.x
-    add eax, obj1Size.x ; eax = obj1Pos.x + obj1Size.x
+    add eax, obj1Size.x 
     mov ebx, obj2Pos.x
-    add ebx, obj2Size.x ; ebx = obj2Pos.x + obj2Size.x
+    add ebx, obj2Size.x
 
     .if obj1Pos.x < ebx && eax > obj2Pos.x
         mov eax, obj1Pos.y
-        add eax, obj1Size.y ; eax = obj1Pos.y + obj1Size.y
+        add eax, obj1Size.y
         mov ebx, obj2Pos.y
-        add ebx, obj2Size.y ; ebx = obj2Pos.y + obj2Size.y
+        add ebx, obj2Size.y
         
-        .if obj1Pos.y < ebx && eax > obj2Pos.y
-            ; the objects are colliding
+        .if obj1Pos.y < ebx && eax > obj2Pos.y ;estão colidindo
             mov edx, TRUE
         .else
             mov edx, FALSE
@@ -123,7 +107,7 @@ isColliding endp
 
 
 ;______________________________________________________________________________
-;n entendi
+;verifica se o player está parado
 isStopped proc addrPlayer:dword
 assume edx:ptr player
     mov edx, addrPlayer
@@ -137,30 +121,30 @@ isStopped endp
 ;______________________________________________________________________________
 
 ;______________________________________________________________________________
-;TODO: fazer as imagens e planejar essa parte
+;decide o background dependendo do que aconteceu
 paintBackground proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
 
-.if GAMESTATE == 0
+.if GAMESTATE == 0 ;O jogo ainda está carregando
     invoke SelectObject, _hMemDC2, h_loading
     invoke BitBlt, _hMemDC, 0, 0, 1200, 800, _hMemDC2, 0, 0, SRCCOPY
 .endif
 
-.if GAMESTATE == 1
+.if GAMESTATE == 1 ;menu inicial
     invoke SelectObject, _hMemDC2, h_menu
     invoke BitBlt, _hMemDC, 0, 0, 1200, 800, _hMemDC2, 0, 0, SRCCOPY
 .endif
 
-.if GAMESTATE == 2
+.if GAMESTATE == 2 ;jogo em si
     invoke SelectObject, _hMemDC2, h_background
     invoke BitBlt, _hMemDC, 0, 0, 1200, 800, _hMemDC2, 0, 0, SRCCOPY
 .endif
 
-.if GAMESTATE == 3 ; player 1 won
+.if GAMESTATE == 3 ;player perdeu
     invoke SelectObject, _hMemDC2, game_over
     invoke BitBlt, _hMemDC, 0, 0, 1200, 800, _hMemDC2, 0, 0, SRCCOPY
 .endif
 
-.if GAMESTATE == 4 ; player 2 won
+.if GAMESTATE == 4 ;player ganhou
     invoke SelectObject, _hMemDC2, p_won
     invoke BitBlt, _hMemDC, 0, 0, 1200, 800, _hMemDC2, 0, 0, SRCCOPY
 .endif
@@ -169,20 +153,18 @@ paintBackground proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
 paintBackground endp
 
 ;______________________________________________________________________________
-
+;pinta a quantidade de vidas na tela
 paintLifes proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
-    ; PLAYER 1
     invoke SelectObject, _hMemDC2, P1 ;a vida tem a imagem do pac man
     mov ebx, 0
-    movzx ecx, player.life
-    .while ebx != ecx
+    movzx ecx, player.life ;guarda quantas vidas ele tem
+    .while ebx != ecx 
         mov eax, LIFE_SIZE
         mul ebx
         push ecx
         invoke TransparentBlt, _hMemDC, eax, 0,\
                 LIFE_SIZE, LIFE_SIZE, _hMemDC2,\
                 0, 0, LIFE_SIZE, LIFE_SIZE, 16777215
-        ;invoke BitBlt, _hdc, eax, 0, HEART_SIZE, HEART_SIZE, _hMemDC, 0, 0, SRCCOPY 
         pop ecx
         inc ebx
     .endw
@@ -190,8 +172,8 @@ paintLifes proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
     ret
 paintLifes endp
 ;______________________________________________________________________________
-
-paintPlayers proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
+;desenha o player na tela
+paintPlayer proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
 
    ;PLAYER 1___________________________________________
         invoke SelectObject, _hMemDC2, P1
@@ -210,20 +192,18 @@ paintPlayers proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
         sub eax, PLAYER_HALF_SIZE
         sub ebx, PLAYER_HALF_SIZE
 
-        ;invoke BitBlt, _hdc, eax, ebx, PLAYER_SIZE, PLAYER_SIZE, _hMemDC, edx, ecx, SRCCOPY 
         invoke TransparentBlt, _hMemDC, eax, ebx,\
             PLAYER_SIZE, PLAYER_SIZE, _hMemDC2,\
             edx, ecx, PLAYER_SIZE, PLAYER_SIZE, 16777215
     ;________________________________________________________________________________
     ret
-paintPlayers endp
+paintPlayer endp
 
 ;________________________________________________________________________________
-
+;desenha os fantasmas na tela
 paintGhosts proc _hdc:HDC, _hMemDC:HDC, _hMemDC2
 
-    ;________GHOST 1 PAINTING_____________________________________________________________
-
+    ;Fantasma 1:
         .if ghost1.afraid == 1 
             invoke SelectObject, _hMemDC2, G0
         .else
@@ -240,7 +220,7 @@ paintGhosts proc _hdc:HDC, _hMemDC:HDC, _hMemDC2
             0, 0, GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, 16777215
 
 
-;________GHOST 2 PAINTING_____________________________________________________________
+;Fantasma 2:
 
         .if ghost2.afraid == 1 
             invoke SelectObject, _hMemDC2, G0
@@ -257,7 +237,7 @@ paintGhosts proc _hdc:HDC, _hMemDC:HDC, _hMemDC2
             GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, _hMemDC2,\
             0, 0, GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, 16777215
 
-;________GHOST 3 PAINTING_____________________________________________________________
+;Fantasma 3:
 
         .if ghost3.afraid == 1 
             invoke SelectObject, _hMemDC3, G0
@@ -274,7 +254,7 @@ paintGhosts proc _hdc:HDC, _hMemDC:HDC, _hMemDC2
             GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, _hMemDC2,\
             0, 0, GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, 16777215
 
-;________GHOST 4 PAINTING_____________________________________________________________
+;Fantasma 4:
 
         .if ghost4.afraid == 1 
             invoke SelectObject, _hMemDC2, G0
@@ -295,7 +275,7 @@ paintGhosts proc _hdc:HDC, _hMemDC:HDC, _hMemDC2
 paintGhosts endp
 
 ;________________________________________________________________________________
-
+;desenha as coisas necessárias na tela
 updateScreen proc
     LOCAL hMemDC:HDC
     LOCAL hMemDC2:HDC
@@ -348,25 +328,25 @@ paintThread proc p:DWORD
 paintThread endp
 
 ;______________________________________________________________________________
-
-movePlayer proc uses eax addrPlayer:dword               ; updates a gameObject position based on its speed
+;função para o personagem se mover, baseado na velocidade
+movePlayer proc uses eax addrPlayer:dword
     assume ecx:ptr gameObject
     mov ecx, addrPlayer
 
-    ; X AXIS ______________
+    ;Horizontal
     mov eax, [ecx].pos.x
     mov ebx, [ecx].speed.x
     .if bx > 7fh
-        or bx, 65280    ; if negative
+        or bx, 65280
     .endif
     add eax, ebx
     mov [ecx].pos.x, eax
 
-    ; Y AXIS ______________
+    ;Vertical
     mov eax, [ecx].pos.y
     mov ebx, [ecx].speed.y
     .if bx > 7fh 
-        or bx, 65280    ; if negative
+        or bx, 65280
     .endif
     add ax, bx
     mov [ecx].pos.y, eax
@@ -376,37 +356,33 @@ movePlayer proc uses eax addrPlayer:dword               ; updates a gameObject p
 movePlayer endp
 
 ;______________________________________________________________________________
-
-
-updateDirection proc addrPlayer:dword     ; updates direction based on players axis's speed
+;função para decidir a direção em que o player está olhando
+updateDirection proc addrPlayer:dword 
 assume eax:ptr player
     mov eax, addrPlayer
 
-    mov ebx, [eax].playerObj.speed.x      ; player's x axis 
-    mov edx, [eax].playerObj.speed.y      ; player's y axis
+    mov ebx, [eax].playerObj.speed.x ;ebx é a velocidade horizontal
+    mov edx, [eax].playerObj.speed.y ;edx é a velocidade vertical
 
     .if ebx != 0 || edx != 0
-        .if ebx == 0                                 ; if x axis = 0 then:
-            .if edx > 7fh                                  ; if y axis < 0
+        .if ebx == 0 ;se o horizontal for 0, vai pra cima ou pra baixo verificando o edx
+            .if edx > 7fh ;se for negativo, vai pra cima
                 mov [eax].direction, D_TOP       
-            .else                                          ;    y axis > 0
+            .else ;se positivo, vai pra baixo
                 mov [eax].direction, D_DOWN     
             .endif 
-        .elseif ebx > 7fh                             ; if x axis > 0
-            .if edx == 0                                    ; if y axis = 0
-                mov [eax].direction, D_LEFT            ; if y axis < 0
-            .endif    
-        .else                                          ; if x axis < 0
-            .if edx == 0                                    ; if y axis = 0
-                mov [eax].direction, D_RIGHT  
+        .elseif ebx > 7fh ;se a velocidade horizontal for negativa, vai pra esquerda
+            mov [eax].direction, D_LEFT 
+        .else ;se não, vai pra direita
+            mov [eax].direction, D_RIGHT  
         .endif
     .endif
     ret
 updateDirection endp
 
 ;______________________________________________________________________________
-
-moveGhost proc uses eax addrGhost:dword               ; updates a gameObject position based on its speed
+;move o fantasma
+moveGhost proc uses eax addrGhost:dword
     assume eax:ptr ghost
     mov eax, addrGhost
 
@@ -415,31 +391,27 @@ moveGhost proc uses eax addrGhost:dword               ; updates a gameObject pos
 
         .if [eax].direction == D_TOP
             add [eax].ghostObj.pos.y, -GHOST_SPEED
-            sub [eax].remainingDistance, GHOST_SPEED
         
         .elseif [eax].direction == D_RIGHT
             add [eax].ghostObj.pos.x,  GHOST_SPEED
-            sub [eax].remainingDistance, GHOST_SPEED
 
         .elseif [eax].direction == D_DOWN
             add [eax].ghostObj.pos.y,  GHOST_SPEED
-            sub [eax].remainingDistance, GHOST_SPEED
 
         .elseif [eax].direction == D_LEFT
             add [eax].ghostObj.pos.x,  -GHOST_SPEED
-            sub [eax].remainingDistance, GHOST_SPEED
         .endif
     assume eax:nothing
     ret
 moveGhost endp
 ;______________________________________________________________________________
-
+;função para o player n sair da tela, mas sim voltar pelo outro lado
 fixCoordinates proc addrPlayer:dword
 assume eax:ptr player
     mov eax, addrPlayer
 
     .if [eax].playerObj.pos.x > WINDOW_SIZE_X && [eax].playerObj.pos.x < 80000000h
-        mov [eax].playerObj.pos.x, 20                   ;sorry
+        mov [eax].playerObj.pos.x, 20
     .endif
 
     .if [eax].playerObj.pos.x <= 10 || [eax].playerObj.pos.x > 80000000h
@@ -458,7 +430,7 @@ ret
 fixCoordinates endp
 
 ;______________________________________________________________________________
-
+;função para o fantasma n sair da tela, mas sim voltar pelo outro lado
 fixGhostCoordinates proc addrGhost:dword
 assume eax:ptr ghost
     mov eax, addrGhost
@@ -485,7 +457,7 @@ ret
 fixGhostCoordinates endp
 
 ;______________________________________________________________________________
-
+;reposiciona tudo no lugar quando o jogo acaba
 gameOver proc
     mov player.playerObj.pos.x, 100
     mov player.playerObj.pos.y, 350
@@ -507,49 +479,154 @@ gameOver proc
     mov ghost1.alive, 1
     mov ghost1.direction, D_RIGHT
 
+    mov ghost2.ghostObj.speed.x, 0
+    mov ghost2.ghostObj.speed.y, 0
+    mov ghost2.ghostObj.pos.x, -100
+    mov ghost2.ghostObj.pos.y, -100
+    mov ghost2.afraid, 0
+    mov ghost2.alive, 1
+    mov ghost2.direction, D_RIGHT
+
+    mov ghost3.ghostObj.speed.x, 0
+    mov ghost3.ghostObj.speed.y, 0
+    mov ghost3.ghostObj.pos.x, -100
+    mov ghost3.ghostObj.pos.y, -100
+    mov ghost3.afraid, 0
+    mov ghost3.alive, 1
+    mov ghost3.direction, D_RIGHT
+
+    mov ghost4.ghostObj.speed.x, 0
+    mov ghost4.ghostObj.speed.y, 0
+    mov ghost4.ghostObj.pos.x, -100
+    mov ghost4.ghostObj.pos.y, -100
+    mov ghost4.afraid, 0
+    mov ghost4.alive, 1
+    mov ghost4.direction, D_RIGHT
+
     ret
 gameOver endp
 
 ;______________________________________________________________________________
-
+;função principal para agir de acordo com o gamestate
 gameManager proc p:dword
         LOCAL area:RECT
         
-        .if GAMESTATE == 0
+        .if GAMESTATE == 0 ;tela de loading
             invoke Sleep, 3000
             inc GAMESTATE
         .endif
 
-        .while GAMESTATE == 1
+        .while GAMESTATE == 1 ;menu
             invoke Sleep, 30
         .endw
 
-        game:
-        .while GAMESTATE == 2
+        game: ;verificações constantes do jogo
+        .while GAMESTATE == 2 ;jogo
             invoke Sleep, 30
 
+            ;verifica se o player tocou no fantasma 1
             invoke isColliding, player.playerObj.pos, ghost1.ghostObj.pos, PLAYER_SIZE_POINT, GHOST_SIZE_POINT
             .if edx == TRUE
-                .if ghost1.afraid == 0
-                    mov player.playerObj.pos.x, 1120 ;posição de reinício
+                .if ghost1.afraid == 0 ; se o fantasma matar o player
+                    ;vai para posição de reinício
+                    mov player.playerObj.pos.x, 1120
                     mov player.playerObj.pos.y, 350
-                    dec player.life
-                    .if player.life == 0
+
+                    dec player.life ;perde uma vida
+                    .if player.life == 0 ;se for a última morreu
                         invoke gameOver
-                        mov GAMESTATE, 3 ; player lost
+                        mov GAMESTATE, 3 ;perdeu
                         .continue
                     .endif
-                .else ;fantasma tem q morrer
-                    mov player.ghostObj.pos.x, 1120 ;posição de reinício
-                    mov player.ghostObj.pos.y, 350
+                .else ;se o pacman estiver buffado e conseguir matar
+                    ;reinicia o fantasma pro meio
+                    mov ghost1.ghostObj.pos.x, 1120
+                    mov ghost1.ghostObj.pos.y, 350
                     mov ghost1.afraid, 0
-                    mov ghost1.alive, 0
-                    invoke Sleep, 4000
                     mov ghost1.alive, 1
                 .endif
             .endif
 
-            ;TODO: Colisão entre pac e fantasma com a parede
+            ;verifica se o player tocou no fantasma 2
+            invoke isColliding, player.playerObj.pos, ghost2.ghostObj.pos, PLAYER_SIZE_POINT, GHOST_SIZE_POINT
+            .if edx == TRUE
+                .if ghost2.afraid == 0 ; se o fantasma matar o player
+                    ;vai para posição de reinício
+                    mov player.playerObj.pos.x, 1120
+                    mov player.playerObj.pos.y, 350
+
+                    dec player.life ;perde uma vida
+                    .if player.life == 0 ;se for a última morreu
+                        invoke gameOver
+                        mov GAMESTATE, 3 ;perdeu
+                        .continue
+                    .endif
+                .else ;se o pacman estiver buffado e conseguir matar
+                    ;reinicia o fantasma pro meio
+                    mov ghost2.ghostObj.pos.x, 1120
+                    mov ghost2.ghostObj.pos.y, 350
+                    mov ghost2.afraid, 0
+                    mov ghost2.alive, 1
+                .endif
+            .endif
+
+            ;verifica se o player tocou no fantasma 3
+            invoke isColliding, player.playerObj.pos, ghost3.ghostObj.pos, PLAYER_SIZE_POINT, GHOST_SIZE_POINT
+            .if edx == TRUE
+                .if ghost3.afraid == 0 ; se o fantasma matar o player
+                    ;vai para posição de reinício
+                    mov player.playerObj.pos.x, 1120
+                    mov player.playerObj.pos.y, 350
+
+                    dec player.life ;perde uma vida
+                    .if player.life == 0 ;se for a última morreu
+                        invoke gameOver
+                        mov GAMESTATE, 3 ;perdeu
+                        .continue
+                    .endif
+                .else ;se o pacman estiver buffado e conseguir matar
+                    ;reinicia o fantasma pro meio
+                    mov ghost3.ghostObj.pos.x, 1120
+                    mov ghost3.ghostObj.pos.y, 350
+                    mov ghost3.afraid, 0
+                    mov ghost3.alive, 1
+                .endif
+            .endif
+
+            ;verifica se o player tocou no fantasma 4
+            invoke isColliding, player.playerObj.pos, ghost4.ghostObj.pos, PLAYER_SIZE_POINT, GHOST_SIZE_POINT
+            .if edx == TRUE
+                .if ghost4.afraid == 0 ; se o fantasma matar o player
+                    ;vai para posição de reinício
+                    mov player.playerObj.pos.x, 1120
+                    mov player.playerObj.pos.y, 350
+
+                    dec player.life ;perde uma vida
+                    .if player.life == 0 ;se for a última morreu
+                        invoke gameOver
+                        mov GAMESTATE, 3 ;perdeu
+                        .continue
+                    .endif
+                .else ;se o pacman estiver buffado e conseguir matar
+                    ;reinicia o fantasma pro meio
+                    mov ghost4.ghostObj.pos.x, 1120
+                    mov ghost4.ghostObj.pos.y, 350
+                    mov ghost4.afraid, 0
+                    mov ghost4.alive, 1
+                .endif
+            .endif
+
+            ;colisão entre o player e a parede
+            invoke isColliding, player.playerObj.pos, wall1.ghostObj.pos, PLAYER_SIZE_POINT, GHOST_SIZE_POINT
+            .if edx == TRUE
+                mov player.playerObj.speed.x, 0
+                mov player.playerObj.speed.y, 0
+                mov player.stopped, 1 ;n sei pra q a gnt vai usar isso mas sla né
+
+            ;Talvez seja melhor pensar em um jeito melhor de fazer as paredes, pq vai ter q ter uma colisão de cada fantasma com cada parede e essa merda vai ficar enorme
+
+            ;TODO: colisão entre player e bolinhas de ponto e pílulas pra ficar brabo
+
 
         .while GAMESTATE == 3 || GAMESTATE == 4
             invoke Sleep, 30
@@ -561,53 +638,32 @@ gameManager endp
 
 ;_____________________________________________________________________________________________________________________________
 
-
-changePlayerSpeed proc uses eax addrPlayer : DWORD, direction : BYTE, keydown : BYTE
+;muda a velocidade do player dependendo da tecla q foi apertada
+changePlayerSpeed proc uses eax addrPlayer : DWORD, direction : BYTE, keydown : BYTE ;provavelmente pd tirar esse keydown mas vou deixar por enquanto so pra ter ctz
     assume eax: ptr player
     mov eax, addrPlayer
 
-    ;TODO: checar se ele n ta colidindo c a parede
-    .if keydown == FALSE ;ele n ta se movendo (provavelmente n vai mudar nada mas dps a gnt testa sem essa merda)
-        .if direction == 0 ; w
-            mov [eax].playerObj.speed.y, -PLAYER_SPEED
-            mov [eax].stopped, 0
-        .elseif direction == 1 ; s
-            mov [eax].playerObj.speed.y, PLAYER_SPEED
-            mov [eax].stopped, 0
-        .elseif direction == 2 ; a
-            mov [eax].playerObj.speed.x, -PLAYER_SPEED
-            mov [eax].stopped, 0
-        .elseif direction == 3 ; d
-            mov [eax].playerObj.speed.x, PLAYER_SPEED
-            mov [eax].stopped, 0
-        .endif
-    .else
-        .if direction == 0 ; w
-            mov [eax].playerObj.speed.y, -PLAYER_SPEED
-            mov [eax].stopped, 0
-        .elseif direction == 1 ; s
-            mov [eax].playerObj.speed.y, PLAYER_SPEED
-            mov [eax].stopped, 0
-        .elseif direction == 2 ; a
-            mov [eax].playerObj.speed.x, -PLAYER_SPEED
-            mov [eax].stopped, 0
-        .elseif direction == 3 ; d
-            mov [eax].playerObj.speed.x, PLAYER_SPEED
-            mov [eax].stopped, 0
-        .endif
+    .if direction == 0 ; w / seta pra cima
+        mov [eax].playerObj.speed.y, -PLAYER_SPEED
+        mov [eax].stopped, 0
+    .elseif direction == 1 ; s / seta pra baixo
+        mov [eax].playerObj.speed.y, PLAYER_SPEED
+        mov [eax].stopped, 0
+    .elseif direction == 2 ; a / seta pra esquerda
+        mov [eax].playerObj.speed.x, -PLAYER_SPEED
+        mov [eax].stopped, 0
+    .elseif direction == 3 ; d / seta pra direita
+        mov [eax].playerObj.speed.x, PLAYER_SPEED
+        mov [eax].stopped, 0
     .endif
+
 
     assume ecx: nothing
     ret
 changePlayerSpeed endp
 
-
-
-;_____________________________________________________________________________________________________________________________
-;_____________________________________________________________________________________________________________________________
-;_____________________________________________________________________________________________________________________________
-
 ; _ WINMAIN __________________________________________________________________________________________________________________
+;cria a janela e faz os procedimentos padrão do windows
 WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD 
     LOCAL clientRect:RECT
     LOCAL wc:WNDCLASSEX                                               ; create local variables on stack 
@@ -671,8 +727,8 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
     mov direction, -1
     mov keydown, -1
 
-
-    .IF uMsg == WM_CREATE
+    ;quando ele recebe uma mensagem, lê qual é
+    .IF uMsg == WM_CREATE ;se ainda for a primeira, tem q cirar tudo
         invoke loadImages
 
         mov eax, offset gameManager 
@@ -684,56 +740,38 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
         invoke CloseHandle, eax
     ;____________________________________________________________________________
 
-    .ELSEIF uMsg == WM_DESTROY                                        ; if the user closes our window 
-        invoke PostQuitMessage,NULL                                   ; quit our application 
+    .ELSEIF uMsg == WM_DESTROY ;se o user fechar
+        invoke PostQuitMessage,NULL ;fecha
     
-    .ELSEIF uMsg == WM_PAINT
-        invoke updateScreen
+    .ELSEIF uMsg == WM_PAINT ;se alguma coisa tiver q ser desenhada
+        invoke updateScreen ;desenha
     ;_____________________________________________________________________________
-    .ELSEIF uMsg == WM_CHAR
-        ;mov eax, offset gameManager
-        ;invoke CreateThread, NULL, NULL, eax, 0, 0, addr threadID 
-        ;invoke CloseHandle, eax
+    .ELSEIF uMsg == WM_CHAR ;se a janela receber um char (so enter no caso sla n entendi isso direito)
+        ;Enter faz o jogo começar / recomeçar nos menus
         .if (wParam == 13) ; [ENTER]
             .if GAMESTATE == 1 || GAMESTATE == 3 || GAMESTATE == 4
                 mov GAMESTATE, 2
             .endif
         .endif
 
-    .ELSEIF uMsg == WM_KEYUP
-    ; PLAYER 1 ____________________________________________________________________
-    ;.if player1.dashsequence == 0
+    .ELSEIF uMsg == WM_KEYUP ;se soltou a tecla (acho q a gnt n vai usar ent provavelmente eu to comentando isso aqui a toa)
+    ;realmente, aperentemente n vai fazer nada pro nosso codigo mas dps a gnt ve se pode tirar mesmo
 
-        ; TODO: FAZER VARIAVEL QUE GUARDA SE O KEYUP FOI APERTADO OU NAO
-
-        .if (wParam == 77h || wParam == 57h || wParam == VK_UP) ;w
-            ;.if (player1.playerObj.speed.y > 7fh) 
-            ;    mov player1.playerObj.speed.y, 0 
-            ;.endif
+        .if (wParam == 77h || wParam == 57h || wParam == VK_UP) ;w ou seta pra cima
             mov keydown, FALSE
             mov direction, 0
 
-        .elseif (wParam == 61h || wParam == 41h || wParam == VK_LEFT) ;a
-            ;.if (player1.playerObj.speed.x > 7fh) 
-            ;    mov player1.playerObj.speed.x, 0 
-            ;.endif
-            mov keydown, FALSE
-            mov direction, 1
-
-        .elseif (wParam == 73h || wParam == 53h || wParam == VK_DOWN) ;s
-            ;.if (player1.playerObj.speed.y < 80h) 
-            ;    mov player1.playerObj.speed.y, 0 
-            ;.endif
+        .elseif (wParam == 61h || wParam == 41h || wParam == VK_LEFT) ;a ou seta pra esquerda
             mov keydown, FALSE
             mov direction, 2
 
-        .elseif (wParam == 64h || wParam == 44h || wParam == VK_LEFT) ;d
-            ;.if (player1.playerObj.speed.x < 80h) 
-            ;    mov player1.playerObj.speed.x, 0 
-            ;.endif
+        .elseif (wParam == 73h || wParam == 53h || wParam == VK_DOWN) ;s ou seta pra baixo
+            mov keydown, FALSE
+            mov direction, 1
+
+        .elseif (wParam == 64h || wParam == 44h || wParam == VK_RIGHT) ;d ou seta pra direita
             mov keydown, FALSE
             mov direction, 3
-
         .endif
 
         .if direction != -1
@@ -744,46 +782,36 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 
     ;.endif
 ;________________________________________________________________________________
-;________________________________________________________________________________
 
-    .ELSEIF uMsg == WM_KEYDOWN
+    .ELSEIF uMsg == WM_KEYDOWN ;apertou uma tecla, tem q mudar a direcao
 
-    ;___________________PLAYER 1 MOVEMENT KEYS____________________________________
-    ;.if player1.dashsequence == 0
-        .if (wParam == 57h || wParam == VK_UP) ; w
-            ;mov player1.playerObj.speed.y, -PLAYER_SPEED
-            ;mov player1.stopped, 0
+        ;esses ifs são usados pra decidir os parâmetros da movimentação e mover embaixo
+        .if (wParam == 57h || wParam == VK_UP) ; w ou seta pra cima
             mov keydown, TRUE
             mov direction, 0
 
-        .elseif (wParam == 53h || wParam == VK_DOWN) ; s
-            ;mov player1.playerObj.speed.y, PLAYER_SPEED
-            ;mov player1.stopped, 0
+        .elseif (wParam == 53h || wParam == VK_DOWN) ; s ou seta pra baixo
             mov keydown, TRUE
             mov direction, 1
 
-        .elseif (wParam == 41h || wParam == VK_LEFT) ; a
-            ;mov player1.playerObj.speed.x, -PLAYER_SPEED
-            ;mov player1.stopped, 0
+        .elseif (wParam == 41h || wParam == VK_LEFT) ; a ou seta pra esquerda
             mov keydown, TRUE
             mov direction, 2
 
-        .elseif (wParam == 44h || wParam == VK_RIGHT) ; d
-            ;mov player1.playerObj.speed.x, PLAYER_SPEED
-            ;mov player1.stopped, 0
+        .elseif (wParam == 44h || wParam == VK_RIGHT) ; d ou seta pra direita
             mov keydown, TRUE
             mov direction, 3
         .endif
 
         .if direction != -1
-            invoke changePlayerSpeed, ADDR player, direction, keydown
+            invoke changePlayerSpeed, ADDR player, direction, keydown ;aqui q ele realmente move o personagem
             mov direction, -1
             mov keydown, -1
         .endif
 
-    .ELSE   
+    .ELSE ;se n for nada de importante faz o padrão mesmo isso n importa 
 
-        invoke DefWindowProc,_hWnd,uMsg,wParam,lParam                  ; Default message processing 
+        invoke DefWindowProc,_hWnd,uMsg,wParam,lParam     ; Default message processing 
         ret 
 
     .ENDIF
