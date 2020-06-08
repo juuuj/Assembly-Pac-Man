@@ -113,6 +113,7 @@ pill ends
 
     PAC_SIZE_POINT      point <32,32>
     GHOST_SIZE_POINT    point <32,32>
+    GHOST_HALF_SIZE_P   point <16,16>
     WALL_SIZE_POINT     point <16,16>
     FOOD_SIZE_POINT     point <8,8>
     PILL_SIZE_POINT     point <8,8>

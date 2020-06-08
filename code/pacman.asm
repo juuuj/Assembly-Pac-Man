@@ -34,7 +34,7 @@ start:
 
 ; _ PROCEDURES ___________________________________________________________________________
 
-loadImages proc                                                 
+loadImages proc              
 
     ;Carregando as imagens dos fantasmas:
     invoke LoadBitmap, hInstance, 100
@@ -57,10 +57,10 @@ loadImages proc
     ;Imagens de coisas do mapa:
     invoke LoadBitmap, hInstance, 112
     mov WALL_TILE, eax
-    ;invoke LoadBitmap, hInstance, 113
-    ;mov FOOD_IMG, eax
-    ;invoke LoadBitmap, hInstance, 114
-    ;mov PILL_IMG, eax
+    invoke LoadBitmap, hInstance, 113
+    mov FOOD_IMG, eax
+    invoke LoadBitmap, hInstance, 114
+    mov PILL_IMG, eax
 
     ;Imagens de background, carregamento e menu:
     invoke LoadBitmap, hInstance, 107
@@ -134,27 +134,29 @@ paintBackground proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
 
 .if GAMESTATE == 0 ;O jogo ainda está carregando
     invoke SelectObject, _hMemDC2, h_loading
-    invoke BitBlt, _hMemDC, 0, 0, 1200, 800, _hMemDC2, 0, 0, SRCCOPY
+    invoke BitBlt, _hMemDC, 0, 0, 800, 600, _hMemDC2, 0, 0, SRCCOPY
 .endif
 
 .if GAMESTATE == 1 ;menu inicial
+    print "game state1 yeah", 13,10
     invoke SelectObject, _hMemDC2, h_menu
-    invoke BitBlt, _hMemDC, 0, 0, 1200, 800, _hMemDC2, 0, 0, SRCCOPY
+    invoke BitBlt, _hMemDC, 0, 0, 800, 600, _hMemDC2, 0, 0, SRCCOPY
 .endif
 
 .if GAMESTATE == 2 ;jogo em si
+    print "game state2 yeah", 13,10
     invoke SelectObject, _hMemDC2, h_background
-    invoke BitBlt, _hMemDC, 0, 0, 1200, 800, _hMemDC2, 0, 0, SRCCOPY
+    invoke BitBlt, _hMemDC, 0, 0, 800, 600, _hMemDC2, 0, 0, SRCCOPY
 .endif
 
 .if GAMESTATE == 3 ;pac perdeu
     invoke SelectObject, _hMemDC2, game_over
-    invoke BitBlt, _hMemDC, 0, 0, 1200, 800, _hMemDC2, 0, 0, SRCCOPY
+    invoke BitBlt, _hMemDC, 0, 0, 800, 600, _hMemDC2, 0, 0, SRCCOPY
 .endif
 
 .if GAMESTATE == 4 ;pac ganhou
     invoke SelectObject, _hMemDC2, p_won
-    invoke BitBlt, _hMemDC, 0, 0, 1200, 800, _hMemDC2, 0, 0, SRCCOPY
+    invoke BitBlt, _hMemDC, 0, 0, 800, 600, _hMemDC2, 0, 0, SRCCOPY
 .endif
 
     ret
@@ -218,8 +220,8 @@ paintGhosts proc _hdc:HDC, _hMemDC:HDC, _hMemDC2
             invoke SelectObject, _hMemDC2, G1
         .endif
 
-        mov eax, ghost1.ghotstObj.pos.x
-        mov ebx, ghotst1.ghotstObj.pos.y
+        mov eax, ghost1.ghostObj.pos.x
+        mov ebx, ghost1.ghostObj.pos.y
         sub eax, GHOST_HALF_SIZE_P.x
         sub ebx, GHOST_HALF_SIZE_P.y
 
@@ -236,8 +238,8 @@ paintGhosts proc _hdc:HDC, _hMemDC:HDC, _hMemDC2
             invoke SelectObject, _hMemDC2, G2
         .endif
 
-        mov eax, ghost2.ghotstObj.pos.x
-        mov ebx, ghotst2.ghotstObj.pos.y
+        mov eax, ghost2.ghostObj.pos.x
+        mov ebx, ghost2.ghostObj.pos.y
         sub eax, GHOST_HALF_SIZE_P.x
         sub ebx, GHOST_HALF_SIZE_P.y
 
@@ -248,13 +250,13 @@ paintGhosts proc _hdc:HDC, _hMemDC:HDC, _hMemDC2
 ;Fantasma 3:
 
         .if ghost3.afraid == 1 
-            invoke SelectObject, _hMemDC3, G0
+            invoke SelectObject, _hMemDC2, G0
         .else
-            invoke SelectObject, _hMemDC3, G3
+            invoke SelectObject, _hMemDC2, G3
         .endif
 
-        mov eax, ghost3.ghotstObj.pos.x
-        mov ebx, ghotst3.ghotstObj.pos.y
+        mov eax, ghost3.ghostObj.pos.x
+        mov ebx, ghost3.ghostObj.pos.y
         sub eax, GHOST_HALF_SIZE_P.x
         sub ebx, GHOST_HALF_SIZE_P.y
 
@@ -270,8 +272,8 @@ paintGhosts proc _hdc:HDC, _hMemDC:HDC, _hMemDC2
             invoke SelectObject, _hMemDC2, G4
         .endif
 
-        mov eax, ghost4.ghotstObj.pos.x
-        mov ebx, ghotst4.ghotstObj.pos.y
+        mov eax, ghost4.ghostObj.pos.x
+        mov ebx, ghost4.ghostObj.pos.y
         sub eax, GHOST_HALF_SIZE_P.x
         sub ebx, GHOST_HALF_SIZE_P.y
 
@@ -353,8 +355,6 @@ updateScreen endp
 paintThread proc p:DWORD
     .while !over
         invoke Sleep, 17 ; 60 FPS
-
-        ;invoke updateScreen
 
         invoke InvalidateRect, hWnd, NULL, FALSE
 
@@ -470,25 +470,24 @@ fixCoordinates endp
 fixGhostCoordinates proc addrGhost:dword
 assume eax:ptr ghost
     mov eax, addrGhost
-    
-.if [eax].onGround == 0
-        .if [eax].ghostObj.pos.x > WINDOW_SIZE_X && [eax].ghostObj.pos.x < 80000000h
-            mov [eax].ghostObj.pos.x, 20                  
-        .endif
 
-        .if [eax].ghostObj.pos.x <= 10 || [eax].ghostObj.pos.x > 80000000h
-            mov [eax].ghostObj.pos.x, 1180 
-        .endif
+    .if [eax].ghostObj.pos.x > WINDOW_SIZE_X && [eax].ghostObj.pos.x < 80000000h
+        mov [eax].ghostObj.pos.x, 20                  
+    .endif
+
+    .if [eax].ghostObj.pos.x <= 10 || [eax].ghostObj.pos.x > 80000000h
+        mov [eax].ghostObj.pos.x, 1180 
+    .endif
 
 
-        .if [eax].ghostObj.pos.y > WINDOW_SIZE_Y - 80 && [eax].ghostObj.pos.y < 80000000h
-            mov [eax].ghostObj.pos.y, 20
-        .endif
+    .if [eax].ghostObj.pos.y > WINDOW_SIZE_Y - 80 && [eax].ghostObj.pos.y < 80000000h
+        mov [eax].ghostObj.pos.y, 20
+    .endif
 
-        .if [eax].ghostObj.pos.y <= 10 || [eax].ghostObj.pos.y > 80000000h
-            mov [eax].ghostObj.pos.y, WINDOW_SIZE_Y - 90 
-        .endif
-.endif
+    .if [eax].ghostObj.pos.y <= 10 || [eax].ghostObj.pos.y > 80000000h
+        mov [eax].ghostObj.pos.y, WINDOW_SIZE_Y - 90 
+    .endif
+
 ret
 fixGhostCoordinates endp
 
@@ -546,7 +545,7 @@ gameOver endp
 ;função principal para agir de acordo com o gamestate
 gameManager proc p:dword
         LOCAL area:RECT
-        
+
         .if GAMESTATE == 0 ;tela de loading
             invoke Sleep, 3000
             inc GAMESTATE
@@ -666,8 +665,8 @@ gameManager proc p:dword
             ;colisão entre o pac e as comidas
             invoke isColliding, pac.playerObj.pos, food1.pos, PAC_SIZE_POINT, FOOD_SIZE_POINT
                 .if edx == TRUE
-                    inc socre, food1.points ;ganha pontos
-                    inc food_left, -1
+                    add score, 10 ;ganha pontos
+                    add food_left, -1
                     .if food_left == 0 ;se as comidas acabarem
                         mov GAMESTATE, 4 ;ganhou
                     .endif
@@ -676,7 +675,7 @@ gameManager proc p:dword
             ;colisão entre o pac e as pílulas
             invoke isColliding, pac.playerObj.pos, food1.pos, PAC_SIZE_POINT, FOOD_SIZE_POINT
                 .if edx == TRUE
-                    inc socre, pill1.points ;ganha pontos
+                    add score, 30 ;ganha pontos
                     mov ghost1.afraid, 1
                     mov ghost2.afraid, 1
                     mov ghost3.afraid, 1
@@ -687,9 +686,7 @@ gameManager proc p:dword
                     mov ghost3.afraid, 0
                     mov ghost4.afraid, 0
                 .endif
-            
-
-
+        .endw 
 
         .while GAMESTATE == 3 || GAMESTATE == 4
             invoke Sleep, 30
