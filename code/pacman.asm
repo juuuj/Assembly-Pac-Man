@@ -48,11 +48,19 @@ loadImages proc
     invoke LoadBitmap, hInstance, 104
     mov G4, eax
 
-    ;Carregando as imagens do player:
+    ;Carregando as imagens do pac:
     invoke LoadBitmap, hInstance, 105
     mov P1, eax
     invoke LoadBitmap, hInstance, 106
     mov P2, eax
+
+    ;Imagens de coisas do mapa:
+    invoke LoadBitmap, hInstance, 112
+    mov WALL_TILE, eax
+    ;invoke LoadBitmap, hInstance, 113
+    ;mov FOOD_IMG, eax
+    ;invoke LoadBitmap, hInstance, 114
+    ;mov PILL_IMG, eax
 
     ;Imagens de background, carregamento e menu:
     invoke LoadBitmap, hInstance, 107
@@ -107,7 +115,7 @@ isColliding endp
 
 
 ;______________________________________________________________________________
-;verifica se o player está parado
+;verifica se o pac está parado
 isStopped proc addrPlayer:dword
 assume edx:ptr player
     mov edx, addrPlayer
@@ -139,12 +147,12 @@ paintBackground proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
     invoke BitBlt, _hMemDC, 0, 0, 1200, 800, _hMemDC2, 0, 0, SRCCOPY
 .endif
 
-.if GAMESTATE == 3 ;player perdeu
+.if GAMESTATE == 3 ;pac perdeu
     invoke SelectObject, _hMemDC2, game_over
     invoke BitBlt, _hMemDC, 0, 0, 1200, 800, _hMemDC2, 0, 0, SRCCOPY
 .endif
 
-.if GAMESTATE == 4 ;player ganhou
+.if GAMESTATE == 4 ;pac ganhou
     invoke SelectObject, _hMemDC2, p_won
     invoke BitBlt, _hMemDC, 0, 0, 1200, 800, _hMemDC2, 0, 0, SRCCOPY
 .endif
@@ -157,7 +165,7 @@ paintBackground endp
 paintLifes proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
     invoke SelectObject, _hMemDC2, P1 ;a vida tem a imagem do pac man
     mov ebx, 0
-    movzx ecx, player.life ;guarda quantas vidas ele tem
+    movzx ecx, pac.life ;guarda quantas vidas ele tem
     .while ebx != ecx 
         mov eax, LIFE_SIZE
         mul ebx
@@ -172,29 +180,29 @@ paintLifes proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
     ret
 paintLifes endp
 ;______________________________________________________________________________
-;desenha o player na tela
+;desenha o pac na tela
 paintPlayer proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
 
-   ;PLAYER 1___________________________________________
+   ;pac 1___________________________________________
         invoke SelectObject, _hMemDC2, P1
 
-        movsx eax, player.direction
-        mov ebx, PLAYER_SIZE
+        movsx eax, pac.direction
+        mov ebx, PAC_SIZE
         mul ebx
         mov ecx, eax
 
-        invoke isStopped, addr player
+        invoke isStopped, addr pac
 
-    ;________PLAYER 1 PAINTING________________________________________________________________________
+    ;________PAC 1 PAINTING________________________________________________________________________
 
-        mov eax, player.playerObj.pos.x
-        mov ebx, player.playerObj.pos.y
-        sub eax, PLAYER_HALF_SIZE
-        sub ebx, PLAYER_HALF_SIZE
+        mov eax, pac.playerObj.pos.x
+        mov ebx, pac.playerObj.pos.y
+        sub eax, PAC_HALF_SIZE
+        sub ebx, PAC_HALF_SIZE
 
         invoke TransparentBlt, _hMemDC, eax, ebx,\
-            PLAYER_SIZE, PLAYER_SIZE, _hMemDC2,\
-            edx, ecx, PLAYER_SIZE, PLAYER_SIZE, 16777215
+            PAC_SIZE, PAC_SIZE, _hMemDC2,\
+            edx, ecx, PAC_SIZE, PAC_SIZE, 16777215
     ;________________________________________________________________________________
     ret
 paintPlayer endp
@@ -275,7 +283,34 @@ paintGhosts proc _hdc:HDC, _hMemDC:HDC, _hMemDC2
 paintGhosts endp
 
 ;________________________________________________________________________________
-;desenha as coisas necessárias na tela
+;desenha tudo no mapa
+paintMap proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
+
+
+
+    ;________PAREDES________________________________________________________________
+
+        ;parede 1:
+        mov eax, wall1.pos.x
+        mov ebx, wall1.pos.y
+
+        invoke TransparentBlt, _hMemDC, eax, ebx, WALL_SIZE, WALL_SIZE, _hMemDC2, edx, ecx, WALL_SIZE, WALL_SIZE, 16777215
+
+    ;________COMIDAS_________________________________________________________________
+
+        ;comida 1:
+        mov eax, food1.pos.x
+        mov ebx, food1.pos.y
+
+        invoke TransparentBlt, _hMemDC, eax, ebx, WALL_SIZE, WALL_SIZE, _hMemDC2, edx, ecx, WALL_SIZE, WALL_SIZE, 16777215
+
+    ;________PÍLULAS_________________________________________________________________
+
+    ret
+paintMap endp
+
+;________________________________________________________________________________
+;desenha tudo que for necessário de uma vez
 updateScreen proc
     LOCAL hMemDC:HDC
     LOCAL hMemDC2:HDC
@@ -299,6 +334,7 @@ updateScreen proc
         invoke paintPlayer, hDC, hMemDC, hMemDC2
         invoke paintGhosts, hDC, hMemDC, hMemDC2
         invoke paintLifes, hDC, hMemDC, hMemDC2
+        invoke paintMap, hDC, hMemDC, hMemDC2
     .endif
 
     invoke BitBlt, hDC, 0, 0, WINDOW_SIZE_X, WINDOW_SIZE_Y, hMemDC, 0, 0, SRCCOPY
@@ -356,7 +392,7 @@ movePlayer proc uses eax addrPlayer:dword
 movePlayer endp
 
 ;______________________________________________________________________________
-;função para decidir a direção em que o player está olhando
+;função para decidir a direção em que o pac está olhando
 updateDirection proc addrPlayer:dword 
 assume eax:ptr player
     mov eax, addrPlayer
@@ -405,7 +441,7 @@ moveGhost proc uses eax addrGhost:dword
     ret
 moveGhost endp
 ;______________________________________________________________________________
-;função para o player n sair da tela, mas sim voltar pelo outro lado
+;função para o pac n sair da tela, mas sim voltar pelo outro lado
 fixCoordinates proc addrPlayer:dword
 assume eax:ptr player
     mov eax, addrPlayer
@@ -459,17 +495,17 @@ fixGhostCoordinates endp
 ;______________________________________________________________________________
 ;reposiciona tudo no lugar quando o jogo acaba
 gameOver proc
-    mov player.playerObj.pos.x, 100
-    mov player.playerObj.pos.y, 350
+    mov pac.playerObj.pos.x, 100
+    mov pac.playerObj.pos.y, 350
     
-    mov player.playerObj.speed.x, 0
-    mov player.playerObj.speed.y, 0
+    mov pac.playerObj.speed.x, 0
+    mov pac.playerObj.speed.y, 0
 
-    mov player.stopped, 1
+    mov pac.stopped, 1
 
-    mov player.life, 4
+    mov pac.life, 4
 
-    mov player.direction, D_RIGHT
+    mov pac.direction, D_RIGHT
 
     mov ghost1.ghostObj.speed.x, 0
     mov ghost1.ghostObj.speed.y, 0
@@ -524,16 +560,16 @@ gameManager proc p:dword
         .while GAMESTATE == 2 ;jogo
             invoke Sleep, 30
 
-            ;verifica se o player tocou no fantasma 1
-            invoke isColliding, player.playerObj.pos, ghost1.ghostObj.pos, PLAYER_SIZE_POINT, GHOST_SIZE_POINT
+            ;verifica se o pac tocou no fantasma 1
+            invoke isColliding, pac.playerObj.pos, ghost1.ghostObj.pos, PAC_SIZE_POINT, GHOST_SIZE_POINT
             .if edx == TRUE
-                .if ghost1.afraid == 0 ; se o fantasma matar o player
+                .if ghost1.afraid == 0 ; se o fantasma matar o pac
                     ;vai para posição de reinício
-                    mov player.playerObj.pos.x, 1120
-                    mov player.playerObj.pos.y, 350
+                    mov pac.playerObj.pos.x, 1120
+                    mov pac.playerObj.pos.y, 350
 
-                    dec player.life ;perde uma vida
-                    .if player.life == 0 ;se for a última morreu
+                    dec pac.life ;perde uma vida
+                    .if pac.life == 0 ;se for a última morreu
                         invoke gameOver
                         mov GAMESTATE, 3 ;perdeu
                         .continue
@@ -547,16 +583,16 @@ gameManager proc p:dword
                 .endif
             .endif
 
-            ;verifica se o player tocou no fantasma 2
-            invoke isColliding, player.playerObj.pos, ghost2.ghostObj.pos, PLAYER_SIZE_POINT, GHOST_SIZE_POINT
+            ;verifica se o pac tocou no fantasma 2
+            invoke isColliding, pac.playerObj.pos, ghost2.ghostObj.pos, PAC_SIZE_POINT, GHOST_SIZE_POINT
             .if edx == TRUE
-                .if ghost2.afraid == 0 ; se o fantasma matar o player
+                .if ghost2.afraid == 0 ; se o fantasma matar o pac
                     ;vai para posição de reinício
-                    mov player.playerObj.pos.x, 1120
-                    mov player.playerObj.pos.y, 350
+                    mov pac.playerObj.pos.x, 1120
+                    mov pac.playerObj.pos.y, 350
 
-                    dec player.life ;perde uma vida
-                    .if player.life == 0 ;se for a última morreu
+                    dec pac.life ;perde uma vida
+                    .if pac.life == 0 ;se for a última morreu
                         invoke gameOver
                         mov GAMESTATE, 3 ;perdeu
                         .continue
@@ -570,16 +606,16 @@ gameManager proc p:dword
                 .endif
             .endif
 
-            ;verifica se o player tocou no fantasma 3
-            invoke isColliding, player.playerObj.pos, ghost3.ghostObj.pos, PLAYER_SIZE_POINT, GHOST_SIZE_POINT
+            ;verifica se o pac tocou no fantasma 3
+            invoke isColliding, pac.playerObj.pos, ghost3.ghostObj.pos, PAC_SIZE_POINT, GHOST_SIZE_POINT
             .if edx == TRUE
-                .if ghost3.afraid == 0 ; se o fantasma matar o player
+                .if ghost3.afraid == 0 ; se o fantasma matar o pac
                     ;vai para posição de reinício
-                    mov player.playerObj.pos.x, 1120
-                    mov player.playerObj.pos.y, 350
+                    mov pac.playerObj.pos.x, 1120
+                    mov pac.playerObj.pos.y, 350
 
-                    dec player.life ;perde uma vida
-                    .if player.life == 0 ;se for a última morreu
+                    dec pac.life ;perde uma vida
+                    .if pac.life == 0 ;se for a última morreu
                         invoke gameOver
                         mov GAMESTATE, 3 ;perdeu
                         .continue
@@ -593,16 +629,16 @@ gameManager proc p:dword
                 .endif
             .endif
 
-            ;verifica se o player tocou no fantasma 4
-            invoke isColliding, player.playerObj.pos, ghost4.ghostObj.pos, PLAYER_SIZE_POINT, GHOST_SIZE_POINT
+            ;verifica se o pac tocou no fantasma 4
+            invoke isColliding, pac.playerObj.pos, ghost4.ghostObj.pos, PAC_SIZE_POINT, GHOST_SIZE_POINT
             .if edx == TRUE
-                .if ghost4.afraid == 0 ; se o fantasma matar o player
+                .if ghost4.afraid == 0 ; se o fantasma matar o pac
                     ;vai para posição de reinício
-                    mov player.playerObj.pos.x, 1120
-                    mov player.playerObj.pos.y, 350
+                    mov pac.playerObj.pos.x, 1120
+                    mov pac.playerObj.pos.y, 350
 
-                    dec player.life ;perde uma vida
-                    .if player.life == 0 ;se for a última morreu
+                    dec pac.life ;perde uma vida
+                    .if pac.life == 0 ;se for a última morreu
                         invoke gameOver
                         mov GAMESTATE, 3 ;perdeu
                         .continue
@@ -616,16 +652,43 @@ gameManager proc p:dword
                 .endif
             .endif
 
-            ;colisão entre o player e a parede
-            invoke isColliding, player.playerObj.pos, wall1.ghostObj.pos, PLAYER_SIZE_POINT, GHOST_SIZE_POINT
+            ;colisão entre o pac e a parede
+            invoke isColliding, pac.playerObj.pos, wall1.pos, PAC_SIZE_POINT, WALL_SIZE_POINT
             .if edx == TRUE
-                mov player.playerObj.speed.x, 0
-                mov player.playerObj.speed.y, 0
-                mov player.stopped, 1 ;n sei pra q a gnt vai usar isso mas sla né
+                mov pac.playerObj.speed.x, 0
+                mov pac.playerObj.speed.y, 0
+                mov pac.stopped, 1 ;n sei pra q a gnt vai usar isso mas sla né
+            .endif
 
-            ;Talvez seja melhor pensar em um jeito melhor de fazer as paredes, pq vai ter q ter uma colisão de cada fantasma com cada parede e essa merda vai ficar enorme
+            ;Talvez seja melhor pensar em um jeito melhor de fazer as paredes, pq vai ter q ter uma colisão de cada fantasma com cada parede e essa merda vai ficar enorme 
+            ;TODO: colisão entre pac e bolinhas de ponto e pílulas pra ficar brabo
 
-            ;TODO: colisão entre player e bolinhas de ponto e pílulas pra ficar brabo
+            ;colisão entre o pac e as comidas
+            invoke isColliding, pac.playerObj.pos, food1.pos, PAC_SIZE_POINT, FOOD_SIZE_POINT
+                .if edx == TRUE
+                    inc socre, food1.points ;ganha pontos
+                    inc food_left, -1
+                    .if food_left == 0 ;se as comidas acabarem
+                        mov GAMESTATE, 4 ;ganhou
+                    .endif
+                .endif
+
+            ;colisão entre o pac e as pílulas
+            invoke isColliding, pac.playerObj.pos, food1.pos, PAC_SIZE_POINT, FOOD_SIZE_POINT
+                .if edx == TRUE
+                    inc socre, pill1.points ;ganha pontos
+                    mov ghost1.afraid, 1
+                    mov ghost2.afraid, 1
+                    mov ghost3.afraid, 1
+                    mov ghost4.afraid, 1
+                    ;aqui vai ter q ter um timer usando o pill1.time mas eu n faço ideia de como faz isso foi mal
+                    mov ghost1.afraid, 0
+                    mov ghost2.afraid, 0
+                    mov ghost3.afraid, 0
+                    mov ghost4.afraid, 0
+                .endif
+            
+
 
 
         .while GAMESTATE == 3 || GAMESTATE == 4
@@ -638,22 +701,22 @@ gameManager endp
 
 ;_____________________________________________________________________________________________________________________________
 
-;muda a velocidade do player dependendo da tecla q foi apertada
+;muda a velocidade do pac dependendo da tecla q foi apertada
 changePlayerSpeed proc uses eax addrPlayer : DWORD, direction : BYTE, keydown : BYTE ;provavelmente pd tirar esse keydown mas vou deixar por enquanto so pra ter ctz
     assume eax: ptr player
     mov eax, addrPlayer
 
     .if direction == 0 ; w / seta pra cima
-        mov [eax].playerObj.speed.y, -PLAYER_SPEED
+        mov [eax].playerObj.speed.y, -PAC_SPEED
         mov [eax].stopped, 0
     .elseif direction == 1 ; s / seta pra baixo
-        mov [eax].playerObj.speed.y, PLAYER_SPEED
+        mov [eax].playerObj.speed.y, PAC_SPEED
         mov [eax].stopped, 0
     .elseif direction == 2 ; a / seta pra esquerda
-        mov [eax].playerObj.speed.x, -PLAYER_SPEED
+        mov [eax].playerObj.speed.x, -PAC_SPEED
         mov [eax].stopped, 0
     .elseif direction == 3 ; d / seta pra direita
-        mov [eax].playerObj.speed.x, PLAYER_SPEED
+        mov [eax].playerObj.speed.x, PAC_SPEED
         mov [eax].stopped, 0
     .endif
 
@@ -775,7 +838,7 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
         .endif
 
         .if direction != -1
-            invoke changePlayerSpeed, ADDR player, direction, keydown
+            invoke changePlayerSpeed, ADDR pac, direction, keydown
             mov direction, -1
             mov keydown, -1
         .endif
@@ -804,7 +867,7 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
         .endif
 
         .if direction != -1
-            invoke changePlayerSpeed, ADDR player, direction, keydown ;aqui q ele realmente move o personagem
+            invoke changePlayerSpeed, ADDR pac, direction, keydown ;aqui q ele realmente move o personagem
             mov direction, -1
             mov keydown, -1
         .endif

@@ -61,9 +61,19 @@ ghost ends
 
 ;parede
 wall struct
-    wallObj         gameObject<>
+    pos         point<>
 wall ends
-                    
+
+food struct
+    pos         point<>
+    points      dd 0
+food ends
+
+pill struct
+    pos         point<>
+    points      dd 0
+    time        dd 0
+pill ends
 
 
 .CONST
@@ -78,17 +88,20 @@ wall ends
     D_DOWN        EQU 3
 
     ;tamanhos de cada objeto:
-    PLAYER_SIZE      EQU 32
-    PLAYER_HALF_SIZE EQU PLAYER_SIZE / 2
+    PAC_SIZE      EQU 32
+    PAC_HALF_SIZE EQU PAC_SIZE / 2
 
     GHOST_SIZE       EQU 32
     GHOST_HALF_SIZE EQU GHOST_SIZE / 2
 
     LIFE_SIZE    EQU 32
 
-    WALL_SIZE EQU 16 ;tem q testar e talvez mudar dps
+    ;tem q testar e talvez mudar dps:
+    WALL_SIZE EQU 16 
+    FOOD_SIZE EQU 8
+    PILL_SIZE EQU 8
 
-    PLAYER_SPEED  EQU 6
+    PAC_SPEED  EQU 6
     GHOST_SPEED   EQU 6
 
 .DATA
@@ -98,8 +111,14 @@ wall ends
 
     paintstruct        PAINTSTRUCT <>
 
-    PLAYER_SIZE_POINT  point <32,32>
-    GHOST_SIZE_POINT   point<32,32>
+    PAC_SIZE_POINT      point <32,32>
+    GHOST_SIZE_POINT    point <32,32>
+    WALL_SIZE_POINT     point <16,16>
+    FOOD_SIZE_POINT     point <8,8>
+    PILL_SIZE_POINT     point <8,8>
+
+    score       dd 0
+    food_left   dd 1
 
     ;inicializando as variáveis que vão guardar as imagens (vazias por enquanto):
     h_background        dd 0
@@ -115,14 +134,18 @@ wall ends
     p_won               dd 0
     game_over           dd 0
 
+    WALL_TILE   dd 0
+    FOOD_IMG    dd 0
+    PILL_IMG    dd 0
+
     test_header_format  db  "A: %d",13,10,0
     buffer              db 256 dup(?)
     msgBoxTitle         db "Testing",0
 
     over byte 0 ;
 
-    ;instancia o player
-    player player <<<100,450>,  <0,0>>, 0, 4, D_RIGHT> 
+    ;instancia o pac
+    pac player <<<100,450>,  <0,0>>, 0, 4, D_RIGHT> 
 
     ;instancia os fantasmas
     ghost1 ghost <<<100,350>,  <0,0>>, 0, 1, D_RIGHT>
@@ -131,7 +154,16 @@ wall ends
     ghost4 ghost <<<400,350>,  <0,0>>, 0, 1, D_RIGHT>
 
     ;instancia as paredes
-    wall1 wall  <<<16, 16>, <0,0>>>
+    ;[nome] wall <<x, y>>
+    wall1 wall  <<16, 16>>
+
+    ;instancia as comidas
+    ;[nome] food <<x, y>, [pontos]>
+    food1 food <<64, 64>, 10>
+
+    ;instancia as pílulas
+    ;[nome] pill <<x, y>, [pontos], [tempo(s)]>
+    pill1 pill <<128, 128>, 30, 5>
     
     RIGHTARROW            BYTE 0
     
