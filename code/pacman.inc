@@ -81,7 +81,7 @@ pill ends
     WINDOW_SIZE_X EQU 800
     WINDOW_SIZE_Y EQU 600
 
-    ;define as direções, pra poder entender o código mais fácilmente nessa linguagem porca
+    ;define as direções, pra poder entender essa parte do código mais fácilmente
     D_RIGHT       EQU 0 
     D_TOP         EQU 1  
     D_LEFT        EQU 2     
@@ -96,7 +96,7 @@ pill ends
 
     LIFE_SIZE    EQU 32
 
-    ;tem q testar e talvez mudar dps:
+    ;tem q testar e talvez mudar dps
     WALL_SIZE EQU 16 
     FOOD_SIZE EQU 8
     PILL_SIZE EQU 8

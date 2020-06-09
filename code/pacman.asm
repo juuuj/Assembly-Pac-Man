@@ -1,6 +1,10 @@
 ; http://win32assembly.programminghorizon.com/tut25.html
 ; http://win32assembly.programminghorizon.com/tut3.html
 
+;Ainda não acabamos os detalhes do projeto porque ao rodar, as imagens simplesmente não aparecem
+;e precisamos rodar para aos poucos achar o melhor posicionamento pro pac-man, fantasmas e paredes
+;por enquanto esses objetos estão com valores aleatórios puramente para teste
+
 .386 
 .model flat,stdcall
 option casemap:none
@@ -10,30 +14,29 @@ include pacman.inc
 WinMain proto :DWORD,:DWORD,:DWORD,:DWORD
 
 .DATA
-ClassName db "PacmanWindowClass",0        ; nome da classe de janela
+ClassName db "PacmanWindowClass",0 
 AppName db "PACMAN",0         
 
 .DATA?
-hInstance HINSTANCE ?        ; Instance handle do programa
+hInstance HINSTANCE ? 
 CommandLine LPSTR ? 
 
-.CODE                ; Here begins our code 
+.CODE
 start: 
 
-    invoke GetModuleHandle, NULL            ; get the instance handle of our program. 
-                                            ; Under Win32, hmodule==hinstance mov hInstance,eax 
+    invoke GetModuleHandle, NULL             
+                                            
     mov hInstance,eax 
 
-    invoke GetCommandLine                   ; get the command line. You don't have to call this function IF 
-                                            ; your program doesn't process the command line. 
+    invoke GetCommandLine                   
     mov CommandLine,eax 
 
-    invoke WinMain, hInstance, NULL, CommandLine, SW_SHOWDEFAULT      ; call the main function 
-    invoke ExitProcess, eax                                           ; quit our program. The exit code is returned in eax from WinMain.
+    invoke WinMain, hInstance, NULL, CommandLine, SW_SHOWDEFAULT ;chama a função principal
+    invoke ExitProcess, eax                                           
 
 
 ; _ PROCEDURES ___________________________________________________________________________
-
+;procedimento para carregar o número certo para cada imagem
 loadImages proc              
 
     ;Carregando as imagens dos fantasmas:
@@ -80,7 +83,7 @@ loadImages proc
 loadImages endp
 
 ;______________________________________________________________________________
-;Função para saber se objetos estão colidindo, guarda no edx
+;Função para saber se objetos estão colidindo, guarda true ou false no edx
 isColliding proc obj1Pos:point, obj2Pos:point, obj1Size:point, obj2Size:point
     
     push eax
@@ -115,7 +118,7 @@ isColliding endp
 
 
 ;______________________________________________________________________________
-;verifica se o pac está parado
+;verifica se o pac está parado (bateu na parede)
 isStopped proc addrPlayer:dword
 assume edx:ptr player
     mov edx, addrPlayer
@@ -126,13 +129,12 @@ assume edx:ptr player
 
 ret
 isStopped endp
-;______________________________________________________________________________
 
 ;______________________________________________________________________________
-;decide o background dependendo do que aconteceu
+;decide o background dependendo do gamestate
 paintBackground proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
 
-.if GAMESTATE == 0 ;O jogo ainda está carregando
+.if GAMESTATE == 0 ;tela de carregamento
     invoke SelectObject, _hMemDC2, h_loading
     invoke BitBlt, _hMemDC, 0, 0, 800, 600, _hMemDC2, 0, 0, SRCCOPY
 .endif
@@ -149,12 +151,12 @@ paintBackground proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
     invoke BitBlt, _hMemDC, 0, 0, 800, 600, _hMemDC2, 0, 0, SRCCOPY
 .endif
 
-.if GAMESTATE == 3 ;pac perdeu
+.if GAMESTATE == 3 ;perdeu
     invoke SelectObject, _hMemDC2, game_over
     invoke BitBlt, _hMemDC, 0, 0, 800, 600, _hMemDC2, 0, 0, SRCCOPY
 .endif
 
-.if GAMESTATE == 4 ;pac ganhou
+.if GAMESTATE == 4 ;ganhou
     invoke SelectObject, _hMemDC2, p_won
     invoke BitBlt, _hMemDC, 0, 0, 800, 600, _hMemDC2, 0, 0, SRCCOPY
 .endif
@@ -165,7 +167,7 @@ paintBackground endp
 ;______________________________________________________________________________
 ;pinta a quantidade de vidas na tela
 paintLifes proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
-    invoke SelectObject, _hMemDC2, P1 ;a vida tem a imagem do pac man
+    invoke SelectObject, _hMemDC2, P1 ;(a vida tem a imagem do pac man)
     mov ebx, 0
     movzx ecx, pac.life ;guarda quantas vidas ele tem
     .while ebx != ecx 
@@ -185,27 +187,23 @@ paintLifes endp
 ;desenha o pac na tela
 paintPlayer proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
 
-   ;pac 1___________________________________________
-        invoke SelectObject, _hMemDC2, P1
+    invoke SelectObject, _hMemDC2, P1
 
-        movsx eax, pac.direction
-        mov ebx, PAC_SIZE
-        mul ebx
-        mov ecx, eax
+    movsx eax, pac.direction
+    mov ebx, PAC_SIZE
+    mul ebx
+    mov ecx, eax
+    invoke isStopped, addr pac
 
-        invoke isStopped, addr pac
+    mov eax, pac.playerObj.pos.x
+    mov ebx, pac.playerObj.pos.y
+    sub eax, PAC_HALF_SIZE
+    sub ebx, PAC_HALF_SIZE
 
-    ;________PAC 1 PAINTING________________________________________________________________________
+    invoke TransparentBlt, _hMemDC, eax, ebx,\
+        PAC_SIZE, PAC_SIZE, _hMemDC2,\
+        edx, ecx, PAC_SIZE, PAC_SIZE, 16777215
 
-        mov eax, pac.playerObj.pos.x
-        mov ebx, pac.playerObj.pos.y
-        sub eax, PAC_HALF_SIZE
-        sub ebx, PAC_HALF_SIZE
-
-        invoke TransparentBlt, _hMemDC, eax, ebx,\
-            PAC_SIZE, PAC_SIZE, _hMemDC2,\
-            edx, ecx, PAC_SIZE, PAC_SIZE, 16777215
-    ;________________________________________________________________________________
     ret
 paintPlayer endp
 
@@ -214,105 +212,106 @@ paintPlayer endp
 paintGhosts proc _hdc:HDC, _hMemDC:HDC, _hMemDC2
 
     ;Fantasma 1:
-        .if ghost1.afraid == 1 
-            invoke SelectObject, _hMemDC2, G0
-        .else
-            invoke SelectObject, _hMemDC2, G1
-        .endif
+    .if ghost1.afraid == 1 
+        invoke SelectObject, _hMemDC2, G0
+    .else
+        invoke SelectObject, _hMemDC2, G1
+    .endif
 
-        mov eax, ghost1.ghostObj.pos.x
-        mov ebx, ghost1.ghostObj.pos.y
-        sub eax, GHOST_HALF_SIZE_P.x
-        sub ebx, GHOST_HALF_SIZE_P.y
+    mov eax, ghost1.ghostObj.pos.x
+    mov ebx, ghost1.ghostObj.pos.y
+    sub eax, GHOST_HALF_SIZE_P.x
+    sub ebx, GHOST_HALF_SIZE_P.y
 
-        invoke TransparentBlt, _hMemDC, eax, ebx,\
-            GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, _hMemDC2,\
-            0, 0, GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, 16777215
+    invoke TransparentBlt, _hMemDC, eax, ebx,\
+        GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, _hMemDC2,\
+        0, 0, GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, 16777215
 
 
 ;Fantasma 2:
 
-        .if ghost2.afraid == 1 
-            invoke SelectObject, _hMemDC2, G0
-        .else
-            invoke SelectObject, _hMemDC2, G2
-        .endif
+    .if ghost2.afraid == 1 
+        invoke SelectObject, _hMemDC2, G0
+    .else
+        invoke SelectObject, _hMemDC2, G2
+    .endif
 
-        mov eax, ghost2.ghostObj.pos.x
-        mov ebx, ghost2.ghostObj.pos.y
-        sub eax, GHOST_HALF_SIZE_P.x
-        sub ebx, GHOST_HALF_SIZE_P.y
+    mov eax, ghost2.ghostObj.pos.x
+    mov ebx, ghost2.ghostObj.pos.y
+    sub eax, GHOST_HALF_SIZE_P.x
+    sub ebx, GHOST_HALF_SIZE_P.y
 
-        invoke TransparentBlt, _hMemDC, eax, ebx,\
-            GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, _hMemDC2,\
-            0, 0, GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, 16777215
+    invoke TransparentBlt, _hMemDC, eax, ebx,\
+        GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, _hMemDC2,\
+        0, 0, GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, 16777215
 
 ;Fantasma 3:
 
-        .if ghost3.afraid == 1 
-            invoke SelectObject, _hMemDC2, G0
-        .else
-            invoke SelectObject, _hMemDC2, G3
-        .endif
+    .if ghost3.afraid == 1 
+        invoke SelectObject, _hMemDC2, G0
+    .else
+        invoke SelectObject, _hMemDC2, G3
+    .endif
 
-        mov eax, ghost3.ghostObj.pos.x
-        mov ebx, ghost3.ghostObj.pos.y
-        sub eax, GHOST_HALF_SIZE_P.x
-        sub ebx, GHOST_HALF_SIZE_P.y
+    mov eax, ghost3.ghostObj.pos.x
+    mov ebx, ghost3.ghostObj.pos.y
+    sub eax, GHOST_HALF_SIZE_P.x
+    sub ebx, GHOST_HALF_SIZE_P.y
 
-        invoke TransparentBlt, _hMemDC, eax, ebx,\
-            GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, _hMemDC2,\
-            0, 0, GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, 16777215
+    invoke TransparentBlt, _hMemDC, eax, ebx,\
+        GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, _hMemDC2,\
+        0, 0, GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, 16777215
 
 ;Fantasma 4:
 
-        .if ghost4.afraid == 1 
-            invoke SelectObject, _hMemDC2, G0
-        .else
-            invoke SelectObject, _hMemDC2, G4
-        .endif
+    .if ghost4.afraid == 1 
+        invoke SelectObject, _hMemDC2, G0
+    .else
+        invoke SelectObject, _hMemDC2, G4
+    .endif
 
-        mov eax, ghost4.ghostObj.pos.x
-        mov ebx, ghost4.ghostObj.pos.y
-        sub eax, GHOST_HALF_SIZE_P.x
-        sub ebx, GHOST_HALF_SIZE_P.y
+    mov eax, ghost4.ghostObj.pos.x
+    mov ebx, ghost4.ghostObj.pos.y
+    sub eax, GHOST_HALF_SIZE_P.x
+    sub ebx, GHOST_HALF_SIZE_P.y
 
-        invoke TransparentBlt, _hMemDC, eax, ebx,\
-            GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, _hMemDC2,\
-            0, 0, GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, 16777215
+    invoke TransparentBlt, _hMemDC, eax, ebx,\
+        GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, _hMemDC2,\
+        0, 0, GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, 16777215
 
     ret
 paintGhosts endp
 
 ;________________________________________________________________________________
-;desenha tudo no mapa
+;desenha os objetos do mapa (paredes, comida, pílulas)
 paintMap proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
-
-
 
     ;________PAREDES________________________________________________________________
 
-        ;parede 1:
-        mov eax, wall1.pos.x
-        mov ebx, wall1.pos.y
-
-        invoke TransparentBlt, _hMemDC, eax, ebx, WALL_SIZE, WALL_SIZE, _hMemDC2, edx, ecx, WALL_SIZE, WALL_SIZE, 16777215
+    ;parede 1:
+    mov eax, wall1.pos.x
+    mov ebx, wall1.pos.y
+    invoke TransparentBlt, _hMemDC, eax, ebx, WALL_SIZE, WALL_SIZE, _hMemDC2, edx, ecx, WALL_SIZE, WALL_SIZE, 16777215
 
     ;________COMIDAS_________________________________________________________________
 
-        ;comida 1:
-        mov eax, food1.pos.x
-        mov ebx, food1.pos.y
-
-        invoke TransparentBlt, _hMemDC, eax, ebx, WALL_SIZE, WALL_SIZE, _hMemDC2, edx, ecx, WALL_SIZE, WALL_SIZE, 16777215
+    ;comida 1:
+    mov eax, food1.pos.x
+    mov ebx, food1.pos.y
+    invoke TransparentBlt, _hMemDC, eax, ebx, FOOD_SIZE, FOOD__SIZE, _hMemDC2, edx, ecx, FOOD_SIZE, FOOD_SIZE, 16777215
 
     ;________PÍLULAS_________________________________________________________________
+
+    ;pílula 1:
+    mov eax, food1.pos.x
+    mov ebx, food1.pos.y
+    invoke TransparentBlt, _hMemDC, eax, ebx, PILL_SIZE, PILL_SIZE, _hMemDC2, edx, ecx, PILL_SIZE, PILL_SIZE, 16777215
 
     ret
 paintMap endp
 
 ;________________________________________________________________________________
-;desenha tudo que for necessário de uma vez
+;chama todas as funções de desenho (dependendo do gamestate)
 updateScreen proc
     LOCAL hMemDC:HDC
     LOCAL hMemDC2:HDC
@@ -323,16 +322,16 @@ updateScreen proc
     mov hDC, eax
     invoke CreateCompatibleDC, hDC
     mov hMemDC, eax
-    invoke CreateCompatibleDC, hDC ; for double buffering
+    invoke CreateCompatibleDC, hDC
     mov hMemDC2, eax
     invoke CreateCompatibleBitmap, hDC, WINDOW_SIZE_X, WINDOW_SIZE_Y
     mov hBitmap, eax
 
     invoke SelectObject, hMemDC, hBitmap
 
-    invoke paintBackground, hDC, hMemDC, hMemDC2
+    invoke paintBackground, hDC, hMemDC, hMemDC2 ;verifica se é necessário mudar o background
 
-    .if GAMESTATE == 2
+    .if GAMESTATE == 2 ;se o gamestate for o do jogo, desenha os objetos
         invoke paintPlayer, hDC, hMemDC, hMemDC2
         invoke paintGhosts, hDC, hMemDC, hMemDC2
         invoke paintLifes, hDC, hMemDC, hMemDC2
@@ -345,13 +344,12 @@ updateScreen proc
     invoke DeleteDC, hMemDC2
     invoke DeleteObject, hBitmap
     invoke EndPaint, hWnd, ADDR paintstruct
-;endif
 
     ret
 updateScreen endp
 
 ;______________________________________________________________________________
-
+;thread de desenho
 paintThread proc p:DWORD
     .while !over
         invoke Sleep, 17 ; 60 FPS
@@ -392,7 +390,7 @@ movePlayer proc uses eax addrPlayer:dword
 movePlayer endp
 
 ;______________________________________________________________________________
-;função para decidir a direção em que o pac está olhando
+;função para decidir a direção em que o pac está olhando (não decidimos se vamos usar desenhos diferentes)
 updateDirection proc addrPlayer:dword 
 assume eax:ptr player
     mov eax, addrPlayer
@@ -417,7 +415,7 @@ assume eax:ptr player
 updateDirection endp
 
 ;______________________________________________________________________________
-;move o fantasma
+;move o fantasma baseado na sua direção
 moveGhost proc uses eax addrGhost:dword
     assume eax:ptr ghost
     mov eax, addrGhost
@@ -454,7 +452,6 @@ assume eax:ptr player
         mov [eax].playerObj.pos.x, WINDOW_SIZE_X - 20 
     .endif
 
-
     .if [eax].playerObj.pos.y > WINDOW_SIZE_Y - 70 && [eax].playerObj.pos.y < 80000000h
         mov [eax].playerObj.pos.y, 20
     .endif
@@ -478,7 +475,6 @@ assume eax:ptr ghost
     .if [eax].ghostObj.pos.x <= 10 || [eax].ghostObj.pos.x > 80000000h
         mov [eax].ghostObj.pos.x, 1180 
     .endif
-
 
     .if [eax].ghostObj.pos.y > WINDOW_SIZE_Y - 80 && [eax].ghostObj.pos.y < 80000000h
         mov [eax].ghostObj.pos.y, 20
@@ -542,16 +538,16 @@ gameOver proc
 gameOver endp
 
 ;______________________________________________________________________________
-;função principal para agir de acordo com o gamestate
+;função principal para o jogo agir de acordo com o gamestate
 gameManager proc p:dword
         LOCAL area:RECT
 
-        .if GAMESTATE == 0 ;tela de loading
+        .if GAMESTATE == 0 ;tela de loading (espera 3s e passa para o próximo)
             invoke Sleep, 3000
             inc GAMESTATE
         .endif
 
-        .while GAMESTATE == 1 ;menu
+        .while GAMESTATE == 1 ;menu (espera o usuário apertar enter)
             invoke Sleep, 30
         .endw
 
@@ -659,8 +655,7 @@ gameManager proc p:dword
                 mov pac.stopped, 1 ;n sei pra q a gnt vai usar isso mas sla né
             .endif
 
-            ;Talvez seja melhor pensar em um jeito melhor de fazer as paredes, pq vai ter q ter uma colisão de cada fantasma com cada parede e essa merda vai ficar enorme 
-            ;TODO: colisão entre pac e bolinhas de ponto e pílulas pra ficar brabo
+            ;Talvez seja melhor pensar em um jeito melhor de fazer as paredes, pq vai ter q ter uma colisão de cada fantasma com cada parede e vai ficar enorme
 
             ;colisão entre o pac e as comidas
             invoke isColliding, pac.playerObj.pos, food1.pos, PAC_SIZE_POINT, FOOD_SIZE_POINT
@@ -680,7 +675,8 @@ gameManager proc p:dword
                     mov ghost2.afraid, 1
                     mov ghost3.afraid, 1
                     mov ghost4.afraid, 1
-                    ;aqui vai ter q ter um timer usando o pill1.time mas eu n faço ideia de como faz isso foi mal
+                    ;espera para eles voltarem ao normal
+                    invoke Sleep, pill1.time
                     mov ghost1.afraid, 0
                     mov ghost2.afraid, 0
                     mov ghost3.afraid, 0
@@ -688,6 +684,7 @@ gameManager proc p:dword
                 .endif
         .endw 
 
+        ;em ambos os casos, só será preciso apertar enter para recomeçar
         .while GAMESTATE == 3 || GAMESTATE == 4
             invoke Sleep, 30
         .endw
@@ -699,7 +696,7 @@ gameManager endp
 ;_____________________________________________________________________________________________________________________________
 
 ;muda a velocidade do pac dependendo da tecla q foi apertada
-changePlayerSpeed proc uses eax addrPlayer : DWORD, direction : BYTE, keydown : BYTE ;provavelmente pd tirar esse keydown mas vou deixar por enquanto so pra ter ctz
+changePlayerSpeed proc uses eax addrPlayer : DWORD, direction : BYTE, keydown : BYTE 
     assume eax: ptr player
     mov eax, addrPlayer
 
@@ -726,10 +723,10 @@ changePlayerSpeed endp
 ;cria a janela e faz os procedimentos padrão do windows
 WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD 
     LOCAL clientRect:RECT
-    LOCAL wc:WNDCLASSEX                                               ; create local variables on stack 
+    LOCAL wc:WNDCLASSEX                                                
     LOCAL msg:MSG 
 
-    mov   wc.cbSize,SIZEOF WNDCLASSEX ; fill values in members of wc 
+    mov   wc.cbSize,SIZEOF WNDCLASSEX 
     mov   wc.style, CS_BYTEALIGNWINDOW
     mov   wc.lpfnWndProc, OFFSET WndProc 
     mov   wc.cbClsExtra,NULL 
@@ -737,7 +734,7 @@ WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD
 
     push  hInstance 
     pop   wc.hInstance 
-    mov   wc.hbrBackground, NULL ; no background
+    mov   wc.hbrBackground, NULL
     mov   wc.lpszMenuName,NULL 
     mov   wc.lpszClassName ,OFFSET ClassName 
 
@@ -748,7 +745,7 @@ WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD
     invoke LoadCursor, NULL,IDC_ARROW 
     mov   wc.hCursor, eax 
 
-    invoke RegisterClassEx, addr wc ; register our window class 
+    invoke RegisterClassEx, addr wc
 
     mov clientRect.left, 0
     mov clientRect.top, 0
@@ -768,16 +765,17 @@ WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD
         eax, ebx, NULL, NULL, hInst, NULL 
         
     mov   hWnd,eax 
-    invoke ShowWindow, hWnd, CmdShow                                  ; display our window on desktop 
-    invoke UpdateWindow, hWnd                                         ; refresh the client area
+    invoke ShowWindow, hWnd, CmdShow 
+    invoke UpdateWindow, hWnd
 
-    .WHILE TRUE                                                       ; Enter message loop 
+    ;a janela vai ficar sempre recebendo mensagens e tratando elas
+    .WHILE TRUE
                 invoke GetMessage, ADDR msg,NULL,0,0 
                 .BREAK .IF (!eax)
                 invoke TranslateMessage, ADDR msg 
                 invoke DispatchMessage, ADDR msg 
     .ENDW 
-    mov     eax,msg.wParam                                            ; return exit code in eax 
+    mov     eax,msg.wParam ;retorna o código de saída no eax
     ret 
 WinMain endp
 
@@ -806,7 +804,7 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
     .ELSEIF uMsg == WM_PAINT ;se alguma coisa tiver q ser desenhada
         invoke updateScreen ;desenha
     ;_____________________________________________________________________________
-    .ELSEIF uMsg == WM_CHAR ;se a janela receber um char (so enter no caso sla n entendi isso direito)
+    .ELSEIF uMsg == WM_CHAR ;se a janela receber enter
         ;Enter faz o jogo começar / recomeçar nos menus
         .if (wParam == 13) ; [ENTER]
             .if GAMESTATE == 1 || GAMESTATE == 3 || GAMESTATE == 4
@@ -814,8 +812,8 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
             .endif
         .endif
 
-    .ELSEIF uMsg == WM_KEYUP ;se soltou a tecla (acho q a gnt n vai usar ent provavelmente eu to comentando isso aqui a toa)
-    ;realmente, aperentemente n vai fazer nada pro nosso codigo mas dps a gnt ve se pode tirar mesmo
+    .ELSEIF uMsg == WM_KEYUP ;se soltou a tecla
+    ;(aperentemente n vai fazer nada pro nosso codigo mas dps a gnt ve se pode tirar mesmo)
 
         .if (wParam == 77h || wParam == 57h || wParam == VK_UP) ;w ou seta pra cima
             mov keydown, FALSE
@@ -843,7 +841,7 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
     ;.endif
 ;________________________________________________________________________________
 
-    .ELSEIF uMsg == WM_KEYDOWN ;apertou uma tecla, tem q mudar a direcao
+    .ELSEIF uMsg == WM_KEYDOWN ;apertou uma tecla, tem q mudar a direção
 
         ;esses ifs são usados pra decidir os parâmetros da movimentação e mover embaixo
         .if (wParam == 57h || wParam == VK_UP) ; w ou seta pra cima
@@ -864,14 +862,14 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
         .endif
 
         .if direction != -1
-            invoke changePlayerSpeed, ADDR pac, direction, keydown ;aqui q ele realmente move o personagem
+            invoke changePlayerSpeed, ADDR pac, direction, keydown ;aqui ele realmente move o personagem
             mov direction, -1
             mov keydown, -1
         .endif
 
     .ELSE ;se n for nada de importante faz o padrão mesmo isso n importa 
 
-        invoke DefWindowProc,_hWnd,uMsg,wParam,lParam     ; Default message processing 
+        invoke DefWindowProc,_hWnd,uMsg,wParam,lParam
         ret 
 
     .ENDIF
