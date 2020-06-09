@@ -3,7 +3,7 @@
 
 ;Ainda não acabamos os detalhes do projeto porque ao rodar, as imagens simplesmente não aparecem
 ;e precisamos rodar para aos poucos achar o melhor posicionamento pro pac-man, fantasmas e paredes
-;por enquanto esses objetos estão com valores aleatórios puramente para teste
+;por enquanto esses objetos estão com valores aleatórios puramente para teste.
 
 .386 
 .model flat,stdcall
@@ -135,18 +135,19 @@ isStopped endp
 paintBackground proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
 
 .if GAMESTATE == 0 ;tela de carregamento
+    ;print "game state 0 yeah", 13,10
     invoke SelectObject, _hMemDC2, h_loading
     invoke BitBlt, _hMemDC, 0, 0, 800, 600, _hMemDC2, 0, 0, SRCCOPY
 .endif
 
 .if GAMESTATE == 1 ;menu inicial
-    print "game state1 yeah", 13,10
+    ;print "game state1 yeah", 13,10
     invoke SelectObject, _hMemDC2, h_menu
     invoke BitBlt, _hMemDC, 0, 0, 800, 600, _hMemDC2, 0, 0, SRCCOPY
 .endif
 
 .if GAMESTATE == 2 ;jogo em si
-    print "game state2 yeah", 13,10
+    ;print "game state2 yeah", 13,10
     invoke SelectObject, _hMemDC2, h_background
     invoke BitBlt, _hMemDC, 0, 0, 800, 600, _hMemDC2, 0, 0, SRCCOPY
 .endif
@@ -845,18 +846,22 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 
         ;esses ifs são usados pra decidir os parâmetros da movimentação e mover embaixo
         .if (wParam == 57h || wParam == VK_UP) ; w ou seta pra cima
+            ;print "cima", 13,10
             mov keydown, TRUE
             mov direction, 0
 
         .elseif (wParam == 53h || wParam == VK_DOWN) ; s ou seta pra baixo
+            ;print "baixo", 13,10
             mov keydown, TRUE
             mov direction, 1
 
         .elseif (wParam == 41h || wParam == VK_LEFT) ; a ou seta pra esquerda
+            ;print "esquerda", 13,10
             mov keydown, TRUE
             mov direction, 2
 
         .elseif (wParam == 44h || wParam == VK_RIGHT) ; d ou seta pra direita
+            ;print "direita", 13,10
             mov keydown, TRUE
             mov direction, 3
         .endif
