@@ -299,7 +299,7 @@ paintMap proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
     ;comida 1:
     mov eax, food1.pos.x
     mov ebx, food1.pos.y
-    invoke TransparentBlt, _hMemDC, eax, ebx, FOOD_SIZE, FOOD__SIZE, _hMemDC2, edx, ecx, FOOD_SIZE, FOOD_SIZE, 16777215
+    invoke TransparentBlt, _hMemDC, eax, ebx, FOOD_SIZE, FOOD_SIZE, _hMemDC2, edx, ecx, FOOD_SIZE, FOOD_SIZE, 16777215
 
     ;________PÍLULAS_________________________________________________________________
 
