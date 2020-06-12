@@ -1,35 +1,10 @@
 include \masm32\include\masm32rt.inc
 include \masm32\include\msimg32.inc
 
-;include \masm32\include\windows.inc 
-;include \masm32\include\user32.inc 
-;include \masm32\include\kernel32.inc 
-;include \masm32\include\gdi32.inc
-;include C:\masm32\include\gdi32.inc
 includelib \masm32\lib\kernel32.lib
 includelib \masm32\lib\user32.lib
 includelib \masm32\lib\gdi32.lib
 includelib \masm32\lib\msimg32.lib
-;includelib C:\masm32\lib\gdi32.lib   ; pode muda depois so fiz isso pra consegui usa em casa
-
-;include C:\masm32\include\windows.inc
-;include C:\masm32\include\masm32.inc
-;include C:\masm32\include\gdi32.inc
-;include C:\masm32\include\user32.inc
-;include C:\masm32\include\kernel32.inc
-;include C:\masm32\include\Comctl32.inc
-;include C:\masm32\include\comdlg32.inc
-;include C:\masm32\include\shell32.inc
-;include C:\masm32\include\msimg32.inc
-
-;includelib C:\masm32\lib\masm32.lib
-;includelib C:\masm32\lib\gdi32.lib
-;includelib C:\masm32\lib\user32.lib
-;includelib C:\masm32\lib\kernel32.lib
-;includelib C:\masm32\lib\Comctl32.lib
-;includelib C:\masm32\lib\comdlg32.lib
-;includelib C:\masm32\lib\shell32.lib
-;includelib C:\masm32\lib\msimg32.lib
 
 ;struct que é usada para definir coisas com x e y (posição e velocidade)
 point struct 
@@ -112,11 +87,19 @@ pill ends
     paintstruct        PAINTSTRUCT <>
 
     PAC_SIZE_POINT      point <32,32>
+    PAC_HALF_SIZE_P     point <16,16>
+
     GHOST_SIZE_POINT    point <32,32>
     GHOST_HALF_SIZE_P   point <16,16>
+
     WALL_SIZE_POINT     point <16,16>
+    WALL_HALF_SIZE_P    point <8,8>
+
     FOOD_SIZE_POINT     point <8,8>
+    FOOD_HALF_SIZE_P    point <4,4>
+
     PILL_SIZE_POINT     point <8,8>
+    PILL_HALF_SIZE_P    point <4,4>
 
     score       dd 0
     food_left   dd 1
@@ -146,25 +129,26 @@ pill ends
     over byte 0 ;
 
     ;instancia o pac
-    pac player <<<100,450>,  <0,0>>, 0, 4, D_RIGHT> 
+    pac player <<<600,500>,  <0,0>>, 0, 4, D_RIGHT> 
 
     ;instancia os fantasmas
-    ghost1 ghost <<<100,350>,  <0,0>>, 0, 1, D_RIGHT>
-    ghost2 ghost <<<200,350>,  <0,0>>, 0, 1, D_RIGHT>
-    ghost3 ghost <<<300,350>,  <0,0>>, 0, 1, D_RIGHT>
-    ghost4 ghost <<<400,350>,  <0,0>>, 0, 1, D_RIGHT>
+    ghost1 ghost <<<300,450>,  <0,0>>, 0, 1, D_RIGHT>
+    ghost2 ghost <<<300,400>,  <0,0>>, 0, 1, D_RIGHT>
+    ghost3 ghost <<<350,450>,  <0,0>>, 0, 1, D_RIGHT>
+    ghost4 ghost <<<350,400>,  <0,0>>, 0, 1, D_RIGHT>
 
     ;instancia as paredes
     ;[nome] wall <<x, y>>
-    wall1 wall  <<16, 16>>
+    wall1 wall  <<500, 400>>
+    wall2 wall  <<600, 400>>
 
     ;instancia as comidas
     ;[nome] food <<x, y>, [pontos]>
-    food1 food <<64, 64>, 10>
+    food1 food <<300, 200>, 10>
 
     ;instancia as pílulas
     ;[nome] pill <<x, y>, [pontos], [tempo(s)]>
-    pill1 pill <<128, 128>, 30, 5>
+    pill1 pill <<150, 200>, 3000, 5>
     
     RIGHTARROW            BYTE 0
     

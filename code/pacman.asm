@@ -198,19 +198,19 @@ paintPlayer proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
 
     mov eax, pac.playerObj.pos.x
     mov ebx, pac.playerObj.pos.y
-    sub eax, PAC_HALF_SIZE
-    sub ebx, PAC_HALF_SIZE
+    sub eax, PAC_HALF_SIZE_P.x
+    sub ebx, PAC_HALF_SIZE_P.y
 
     invoke TransparentBlt, _hMemDC, eax, ebx,\
         PAC_SIZE, PAC_SIZE, _hMemDC2,\
-        edx, ecx, PAC_SIZE, PAC_SIZE, 16777215
+        0, 0, PAC_SIZE, PAC_SIZE, 16777215
 
     ret
 paintPlayer endp
 
 ;________________________________________________________________________________
 ;desenha os fantasmas na tela
-paintGhosts proc _hdc:HDC, _hMemDC:HDC, _hMemDC2
+paintGhosts proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
 
     ;Fantasma 1:
     .if ghost1.afraid == 1 
@@ -283,30 +283,54 @@ paintGhosts proc _hdc:HDC, _hMemDC:HDC, _hMemDC2
     ret
 paintGhosts endp
 
+;_______________________________________________________________________________
+paintWall proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC, addrWall:dword
+assume eax:ptr wall
+    mov eax, addrWall
+
+    invoke SelectObject, _hMemDC2, WALL_TILE
+
+    mov eax, [eax].pos.x
+    mov ebx, [eax].pos.y
+    sub eax, WALL_HALF_SIZE_P.x
+    sub ebx, WALL_HALF_SIZE_P.y
+
+    invoke TransparentBlt, _hMemDC, eax, ebx,\
+        WALL_SIZE_POINT.x, WALL_SIZE_POINT.y, _hMemDC2,\
+        0, 0, WALL_SIZE_POINT.x, WALL_SIZE_POINT.y, 16777215
+
+ret
+paintWall endp
+
 ;________________________________________________________________________________
 ;desenha os objetos do mapa (paredes, comida, pílulas)
 paintMap proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
 
     ;________PAREDES________________________________________________________________
-
+    invoke SelectObject, _hMemDC2, WALL_TILE
     ;parede 1:
     mov eax, wall1.pos.x
     mov ebx, wall1.pos.y
-    invoke TransparentBlt, _hMemDC, eax, ebx, WALL_SIZE, WALL_SIZE, _hMemDC2, edx, ecx, WALL_SIZE, WALL_SIZE, 16777215
+    invoke TransparentBlt, _hMemDC, eax, ebx, WALL_SIZE, WALL_SIZE, _hMemDC2, 0, 0, WALL_SIZE, WALL_SIZE, 16777215
+    mov eax, wall2.pos.x
+    mov ebx, wall2.pos.y
+    invoke TransparentBlt, _hMemDC, eax, ebx, WALL_SIZE, WALL_SIZE, _hMemDC2, 0, 0, WALL_SIZE, WALL_SIZE, 16777215
+    ;invoke paintWall, _hDC, _hMemDC, _hMemDC2, addr wall1
+    ;invoke paintWall, _hDC, _hMemDC, _hMemDC2, addr wall2
 
     ;________COMIDAS_________________________________________________________________
-
+    invoke SelectObject, _hMemDC2, FOOD_IMG
     ;comida 1:
     mov eax, food1.pos.x
     mov ebx, food1.pos.y
-    invoke TransparentBlt, _hMemDC, eax, ebx, FOOD_SIZE, FOOD_SIZE, _hMemDC2, edx, ecx, FOOD_SIZE, FOOD_SIZE, 16777215
+    invoke TransparentBlt, _hMemDC, eax, ebx, FOOD_SIZE, FOOD_SIZE, _hMemDC2, 0, 0, FOOD_SIZE, FOOD_SIZE, 16777215
 
     ;________PÍLULAS_________________________________________________________________
-
+    invoke SelectObject, _hMemDC2, PILL_IMG
     ;pílula 1:
-    mov eax, food1.pos.x
-    mov ebx, food1.pos.y
-    invoke TransparentBlt, _hMemDC, eax, ebx, PILL_SIZE, PILL_SIZE, _hMemDC2, edx, ecx, PILL_SIZE, PILL_SIZE, 16777215
+    mov eax, pill1.pos.x
+    mov ebx, pill1.pos.y
+    invoke TransparentBlt, _hMemDC, eax, ebx, PILL_SIZE, PILL_SIZE, _hMemDC2, 0, 0, PILL_SIZE, PILL_SIZE, 16777215
 
     ret
 paintMap endp
@@ -415,6 +439,29 @@ assume eax:ptr player
     ret
 updateDirection endp
 
+updateGhostDirection proc addrGhost:dword 
+assume eax:ptr ghost
+    mov eax, addrGhost
+
+    mov ebx, [eax].ghostObj.speed.x ;ebx é a velocidade horizontal
+    mov edx, [eax].ghostObj.speed.y ;edx é a velocidade vertical
+
+    .if ebx != 0 || edx != 0
+        .if ebx == 0 ;se o horizontal for 0, vai pra cima ou pra baixo verificando o edx
+            .if edx > 7fh ;se for negativo, vai pra cima
+                mov [eax].direction, D_TOP       
+            .else ;se positivo, vai pra baixo
+                mov [eax].direction, D_DOWN     
+            .endif 
+        .elseif ebx > 7fh ;se a velocidade horizontal for negativa, vai pra esquerda
+            mov [eax].direction, D_LEFT 
+        .else ;se não, vai pra direita
+            mov [eax].direction, D_RIGHT  
+        .endif
+    .endif
+    ret
+updateGhostDirection endp
+
 ;______________________________________________________________________________
 ;move o fantasma baseado na sua direção
 moveGhost proc uses eax addrGhost:dword
@@ -488,11 +535,71 @@ assume eax:ptr ghost
 ret
 fixGhostCoordinates endp
 
+;_____________________________________________________________________________
+colideWithWall proc addrWall:dword
+assume eax:ptr wall
+    mov eax, addrWall
+   
+    invoke isColliding, pac.playerObj.pos, [eax].pos, PAC_SIZE_POINT, WALL_SIZE_POINT
+        .if edx == TRUE
+            mov pac.playerObj.speed.x, 0
+            mov pac.playerObj.speed.y, 0
+            mov pac.stopped, 1 ;n sei pra q a gnt vai usar isso mas sla né
+        .endif
+
+ret
+colideWithWall endp
+
+;_____________________________________________________________________________
+colideWithFood proc addrFood:dword
+assume eax:ptr food
+    mov eax, addrFood
+   
+    invoke isColliding, pac.playerObj.pos, [eax].pos, PAC_SIZE_POINT, FOOD_SIZE_POINT
+        .if edx == TRUE
+            mov [eax].pos.x, -100
+            mov [eax].pos.y, -100
+            add score, 10 ;ganha pontos
+            add food_left, -1
+            .if food_left == 0 ;se as comidas acabarem
+                mov GAMESTATE, 4 ;ganhou
+            .endif
+        .endif
+
+ret
+colideWithFood endp
+
+;_____________________________________________________________________________
+colideWithPill proc addrPill:dword
+assume eax:ptr pill
+    mov eax, addrPill
+   
+    invoke isColliding, pac.playerObj.pos, [eax].pos, PAC_SIZE_POINT, PILL_SIZE_POINT
+        .if edx == TRUE
+            mov [eax].pos.x, -100
+            mov [eax].pos.y, -100
+            add score, 30 ;ganha pontos
+            mov ghost1.afraid, 1
+            mov ghost2.afraid, 1
+            mov ghost3.afraid, 1
+            mov ghost4.afraid, 1
+            invoke updateScreen
+            ;espera para eles voltarem ao normal
+            invoke Sleep, pill1.time
+            mov ghost1.afraid, 0
+            mov ghost2.afraid, 0
+            mov ghost3.afraid, 0
+            mov ghost4.afraid, 0
+            invoke updateScreen
+        .endif
+
+ret
+colideWithPill endp
 ;______________________________________________________________________________
 ;reposiciona tudo no lugar quando o jogo acaba
 gameOver proc
-    mov pac.playerObj.pos.x, 100
-    mov pac.playerObj.pos.y, 350
+    mov pac.playerObj.pos.x, 600
+    mov pac.playerObj.pos.y, 500 
     
     mov pac.playerObj.speed.x, 0
     mov pac.playerObj.speed.y, 0
@@ -505,32 +612,32 @@ gameOver proc
 
     mov ghost1.ghostObj.speed.x, 0
     mov ghost1.ghostObj.speed.y, 0
-    mov ghost1.ghostObj.pos.x, -100
-    mov ghost1.ghostObj.pos.y, -100
-    mov ghost1.afraid, 0
-    mov ghost1.alive, 1
+    mov ghost1.ghostObj.pos.x, 300
+    mov ghost1.ghostObj.pos.y, 450
+    mov ghost1.afraid, 1 
+    mov ghost1.alive, 0
     mov ghost1.direction, D_RIGHT
 
     mov ghost2.ghostObj.speed.x, 0
     mov ghost2.ghostObj.speed.y, 0
-    mov ghost2.ghostObj.pos.x, -100
-    mov ghost2.ghostObj.pos.y, -100
+    mov ghost2.ghostObj.pos.x, 300
+    mov ghost2.ghostObj.pos.y, 400
     mov ghost2.afraid, 0
     mov ghost2.alive, 1
     mov ghost2.direction, D_RIGHT
 
     mov ghost3.ghostObj.speed.x, 0
     mov ghost3.ghostObj.speed.y, 0
-    mov ghost3.ghostObj.pos.x, -100
-    mov ghost3.ghostObj.pos.y, -100
+    mov ghost3.ghostObj.pos.x, 350
+    mov ghost3.ghostObj.pos.y, 450
     mov ghost3.afraid, 0
     mov ghost3.alive, 1
     mov ghost3.direction, D_RIGHT
 
     mov ghost4.ghostObj.speed.x, 0
     mov ghost4.ghostObj.speed.y, 0
-    mov ghost4.ghostObj.pos.x, -100
-    mov ghost4.ghostObj.pos.y, -100
+    mov ghost4.ghostObj.pos.x, 350
+    mov ghost4.ghostObj.pos.y, 400
     mov ghost4.afraid, 0
     mov ghost4.alive, 1
     mov ghost4.direction, D_RIGHT
@@ -649,42 +756,63 @@ gameManager proc p:dword
             .endif
 
             ;colisão entre o pac e a parede
-            invoke isColliding, pac.playerObj.pos, wall1.pos, PAC_SIZE_POINT, WALL_SIZE_POINT
-            .if edx == TRUE
-                mov pac.playerObj.speed.x, 0
-                mov pac.playerObj.speed.y, 0
-                mov pac.stopped, 1 ;n sei pra q a gnt vai usar isso mas sla né
-            .endif
+            invoke colideWithWall, addr wall1
+            invoke colideWithWall, addr wall2
+            ;invoke isColliding, pac.playerObj.pos, wall1.pos, PAC_SIZE_POINT, WALL_SIZE_POINT
+            ;.if edx == TRUE
+            ;    mov pac.playerObj.speed.x, 0
+            ;    mov pac.playerObj.speed.y, 0
+            ;    mov pac.stopped, 1 ;n sei pra q a gnt vai usar isso mas sla né
+            ;.endif
 
             ;Talvez seja melhor pensar em um jeito melhor de fazer as paredes, pq vai ter q ter uma colisão de cada fantasma com cada parede e vai ficar enorme
 
             ;colisão entre o pac e as comidas
-            invoke isColliding, pac.playerObj.pos, food1.pos, PAC_SIZE_POINT, FOOD_SIZE_POINT
-                .if edx == TRUE
-                    add score, 10 ;ganha pontos
-                    add food_left, -1
-                    .if food_left == 0 ;se as comidas acabarem
-                        mov GAMESTATE, 4 ;ganhou
-                    .endif
-                .endif
+            invoke colideWithFood, addr food1
+            ;invoke isColliding, pac.playerObj.pos, food1.pos, PAC_SIZE_POINT, FOOD_SIZE_POINT
+            ;    .if edx == TRUE
+            ;        add score, 10 ;ganha pontos
+            ;        add food_left, -1
+            ;        .if food_left == 0 ;se as comidas acabarem
+            ;            mov GAMESTATE, 4 ;ganhou
+            ;        .endif
+            ;    .endif
 
             ;colisão entre o pac e as pílulas
-            invoke isColliding, pac.playerObj.pos, food1.pos, PAC_SIZE_POINT, FOOD_SIZE_POINT
-                .if edx == TRUE
-                    add score, 30 ;ganha pontos
-                    mov ghost1.afraid, 1
-                    mov ghost2.afraid, 1
-                    mov ghost3.afraid, 1
-                    mov ghost4.afraid, 1
-                    ;espera para eles voltarem ao normal
-                    invoke Sleep, pill1.time
-                    mov ghost1.afraid, 0
-                    mov ghost2.afraid, 0
-                    mov ghost3.afraid, 0
-                    mov ghost4.afraid, 0
-                .endif
-        .endw 
+            invoke colideWithPill, addr pill1
+            ;invoke isColliding, pac.playerObj.pos, pill1.pos, PAC_SIZE_POINT, PILL_SIZE_POINT
+            ;    .if edx == TRUE
+            ;        add score, 30 ;ganha pontos
+            ;        mov ghost1.afraid, 1
+            ;        mov ghost2.afraid, 1
+            ;        mov ghost3.afraid, 1
+            ;        mov ghost4.afraid, 1
+            ;        invoke updateScreen
+            ;        ;espera para eles voltarem ao normal
+            ;        invoke Sleep, pill1.time
+            ;        mov ghost1.afraid, 0
+            ;        mov ghost2.afraid, 0
+            ;        mov ghost3.afraid, 0
+            ;        mov ghost4.afraid, 0
+            ;        invoke updateScreen
+            ;    .endif
 
+                invoke movePlayer, addr pac
+                invoke moveGhost, addr ghost1
+                invoke moveGhost, addr ghost2
+                invoke moveGhost, addr ghost3
+                invoke moveGhost, addr ghost4
+                
+                invoke updateDirection, addr pac.playerObj
+                
+                invoke fixCoordinates, addr pac
+                invoke fixCoordinates, addr ghost1
+                invoke fixCoordinates, addr ghost2
+                invoke fixCoordinates, addr ghost3
+                invoke fixCoordinates, addr ghost4
+
+        .endw 
+    
         ;em ambos os casos, só será preciso apertar enter para recomeçar
         .while GAMESTATE == 3 || GAMESTATE == 4
             invoke Sleep, 30
@@ -703,15 +831,19 @@ changePlayerSpeed proc uses eax addrPlayer : DWORD, direction : BYTE, keydown : 
 
     .if direction == 0 ; w / seta pra cima
         mov [eax].playerObj.speed.y, -PAC_SPEED
+        mov [eax].playerObj.speed.x, 0
         mov [eax].stopped, 0
     .elseif direction == 1 ; s / seta pra baixo
         mov [eax].playerObj.speed.y, PAC_SPEED
+        mov [eax].playerObj.speed.x, 0
         mov [eax].stopped, 0
     .elseif direction == 2 ; a / seta pra esquerda
         mov [eax].playerObj.speed.x, -PAC_SPEED
+        mov [eax].playerObj.speed.y, 0
         mov [eax].stopped, 0
     .elseif direction == 3 ; d / seta pra direita
         mov [eax].playerObj.speed.x, PAC_SPEED
+        mov [eax].playerObj.speed.y, 0
         mov [eax].stopped, 0
     .endif
 
@@ -813,22 +945,26 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
             .endif
         .endif
 
-    .ELSEIF uMsg == WM_KEYUP ;se soltou a tecla
+    .ELSEIF uMsg == WM_KEYDOWN ;se soltou a tecla
     ;(aperentemente n vai fazer nada pro nosso codigo mas dps a gnt ve se pode tirar mesmo)
 
         .if (wParam == 77h || wParam == 57h || wParam == VK_UP) ;w ou seta pra cima
+            print "cima", 13,10
             mov keydown, FALSE
             mov direction, 0
 
         .elseif (wParam == 61h || wParam == 41h || wParam == VK_LEFT) ;a ou seta pra esquerda
+            print "esquerda", 13,10
             mov keydown, FALSE
             mov direction, 2
 
         .elseif (wParam == 73h || wParam == 53h || wParam == VK_DOWN) ;s ou seta pra baixo
+            print "baixo", 13,10
             mov keydown, FALSE
             mov direction, 1
 
         .elseif (wParam == 64h || wParam == 44h || wParam == VK_RIGHT) ;d ou seta pra direita
+            print "direita", 13,10
             mov keydown, FALSE
             mov direction, 3
         .endif
@@ -841,36 +977,6 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 
     ;.endif
 ;________________________________________________________________________________
-
-    .ELSEIF uMsg == WM_KEYDOWN ;apertou uma tecla, tem q mudar a direção
-
-        ;esses ifs são usados pra decidir os parâmetros da movimentação e mover embaixo
-        .if (wParam == 57h || wParam == VK_UP) ; w ou seta pra cima
-            ;print "cima", 13,10
-            mov keydown, TRUE
-            mov direction, 0
-
-        .elseif (wParam == 53h || wParam == VK_DOWN) ; s ou seta pra baixo
-            ;print "baixo", 13,10
-            mov keydown, TRUE
-            mov direction, 1
-
-        .elseif (wParam == 41h || wParam == VK_LEFT) ; a ou seta pra esquerda
-            ;print "esquerda", 13,10
-            mov keydown, TRUE
-            mov direction, 2
-
-        .elseif (wParam == 44h || wParam == VK_RIGHT) ; d ou seta pra direita
-            ;print "direita", 13,10
-            mov keydown, TRUE
-            mov direction, 3
-        .endif
-
-        .if direction != -1
-            invoke changePlayerSpeed, ADDR pac, direction, keydown ;aqui ele realmente move o personagem
-            mov direction, -1
-            mov keydown, -1
-        .endif
 
     .ELSE ;se n for nada de importante faz o padrão mesmo isso n importa 
 
