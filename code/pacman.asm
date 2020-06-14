@@ -386,6 +386,35 @@ paintThread proc p:DWORD
     ret
 paintThread endp
 
+;_____________________________________________________________________________
+willCollide proc direction:BYTE, addrObj:dword
+assume eax:ptr gameObject
+    mov eax, addrObj
+
+    push ebx
+
+    mov ebx, [eax].pos.x
+    mov tempPos.x, ebx
+    mov ebx, [eax].pos.y
+    mov tempPos.y, ebx
+
+    .if direction == 0 ;right
+        add tempPos.x, 2
+    .elseif direction == 1 ;top
+        add tempPos.y, -2
+    .elseif direction == 2 ;left
+        add tempPos.x, -2
+    .elseif direction == 3 ;down
+        add tempPos.y, 2
+    .endif
+
+    invoke isColliding, tempPos, wall1.pos, PAC_SIZE_POINT, WALL_SIZE_POINT
+
+    pop ebx
+
+;assume eax:nothing
+ret
+willCollide endp
 ;______________________________________________________________________________
 ;função para o personagem se mover, baseado na velocidade
 movePlayer proc uses eax addrPlayer:dword
@@ -398,6 +427,14 @@ movePlayer proc uses eax addrPlayer:dword
     .if bx > 7fh
         or bx, 65280
     .endif
+
+    ;.if ebx > 0 ;direita
+    ;    print "direitasssssssss", 13, 10
+        ;invoke willCollide, D_RIGHT, addr [ecx]
+    ;.elseif ebx < 0 ;esquerda
+    ;    print "esquerdaaaaaaaaaaaaa", 13, 10
+        ;invoke willCollide, D_LEFT, addr [ecx]
+    ;.endif
     add eax, ebx
     mov [ecx].pos.x, eax
 
@@ -414,30 +451,54 @@ movePlayer proc uses eax addrPlayer:dword
     ret
 movePlayer endp
 
+
+;movePlayer proc
+
+    ;mov eax, pac.playerObj.speed.x
+    ;mov ebx, pac.playerObj.speed.y
+
+    ;invoke willCollide, pac.direction, addr pac.playerObj
+    ;.if edx == FALSE
+        
+
+
+        ;.if pac.direction == D_TOP
+        ;    add pac.playerObj.pos.y, -PAC_SPEED
+        ;.elseif pac.direction == D_RIGHT
+        ;    add pac.playerObj.pos.x, PAC_SPEED
+        ;.elseif pac.direction == D_DOWN
+        ;    add pac.playerObj.pos.y, PAC_SPEED
+        ;.elseif pac.direction == D_LEFT
+        ;    add pac.playerObj.pos.x, -PAC_SPEED
+        ;.endif
+    ;.endif
+
+;movePlayer endp
+
 ;______________________________________________________________________________
 ;função para decidir a direção em que o pac está olhando (não decidimos se vamos usar desenhos diferentes)
-updateDirection proc addrPlayer:dword 
-assume eax:ptr player
-    mov eax, addrPlayer
-
-    mov ebx, [eax].playerObj.speed.x ;ebx é a velocidade horizontal
-    mov edx, [eax].playerObj.speed.y ;edx é a velocidade vertical
-
-    .if ebx != 0 || edx != 0
-        .if ebx == 0 ;se o horizontal for 0, vai pra cima ou pra baixo verificando o edx
-            .if edx > 7fh ;se for negativo, vai pra cima
-                mov [eax].direction, D_TOP       
-            .else ;se positivo, vai pra baixo
-                mov [eax].direction, D_DOWN     
-            .endif 
-        .elseif ebx > 7fh ;se a velocidade horizontal for negativa, vai pra esquerda
-            mov [eax].direction, D_LEFT 
-        .else ;se não, vai pra direita
-            mov [eax].direction, D_RIGHT  
-        .endif
-    .endif
-    ret
-updateDirection endp
+;updateDirection proc addrPlayer:dword 
+;assume eax:ptr player
+;    mov eax, addrPlayer
+;
+;    mov ebx, [eax].playerObj.speed.x ;ebx é a velocidade horizontal
+;    mov edx, [eax].playerObj.speed.y ;edx é a velocidade vertical
+;
+;    .if ebx != 0 || edx != 0
+;        .if ebx == 0 ;se o horizontal for 0, vai pra cima ou pra baixo verificando o edx
+;            .if edx > 7fh ;se for negativo, vai pra cima
+;                mov [eax].direction, D_TOP       
+;            .else ;se positivo, vai pra baixo
+;                mov [eax].direction, D_DOWN     
+;            .endif 
+;        .elseif ebx > 7fh ;se a velocidade horizontal for negativa, vai pra esquerda
+;            mov [eax].direction, D_LEFT 
+;        .else ;se não, vai pra direita
+;            mov [eax].direction, D_RIGHT  
+;        .endif
+;    .endif
+;    ret
+;updateDirection endp
 
 updateGhostDirection proc addrGhost:dword 
 assume eax:ptr ghost
@@ -471,18 +532,18 @@ moveGhost proc uses eax addrGhost:dword
     mov ebx, [eax].ghostObj.speed.x
     mov ecx, [eax].ghostObj.speed.y
 
+    invoke willCollide, [eax].direction, addr [eax].ghostObj
+    .if edx == FALSE
         .if [eax].direction == D_TOP
             add [eax].ghostObj.pos.y, -GHOST_SPEED
-        
         .elseif [eax].direction == D_RIGHT
             add [eax].ghostObj.pos.x,  GHOST_SPEED
-
         .elseif [eax].direction == D_DOWN
             add [eax].ghostObj.pos.y,  GHOST_SPEED
-
         .elseif [eax].direction == D_LEFT
             add [eax].ghostObj.pos.x,  -GHOST_SPEED
         .endif
+    .endif
     assume eax:nothing
     ret
 moveGhost endp
@@ -507,6 +568,7 @@ assume eax:ptr player
     .if [eax].playerObj.pos.y <= 10 || [eax].playerObj.pos.y > 80000000h
         mov [eax].playerObj.pos.y, WINDOW_SIZE_Y - 80 
     .endif
+assume eax:nothing
 ret
 fixCoordinates endp
 
@@ -531,7 +593,7 @@ assume eax:ptr ghost
     .if [eax].ghostObj.pos.y <= 10 || [eax].ghostObj.pos.y > 80000000h
         mov [eax].ghostObj.pos.y, WINDOW_SIZE_Y - 90 
     .endif
-
+assume eax:nothing
 ret
 fixGhostCoordinates endp
 
@@ -546,9 +608,11 @@ assume eax:ptr wall
             mov pac.playerObj.speed.y, 0
             mov pac.stopped, 1 ;n sei pra q a gnt vai usar isso mas sla né
         .endif
-
+assume eax:nothing
 ret
 colideWithWall endp
+
+
 
 ;_____________________________________________________________________________
 colideWithFood proc addrFood:dword
@@ -756,8 +820,8 @@ gameManager proc p:dword
             .endif
 
             ;colisão entre o pac e a parede
-            invoke colideWithWall, addr wall1
-            invoke colideWithWall, addr wall2
+            ;invoke colideWithWall, addr wall1
+            ;invoke colideWithWall, addr wall2
             ;invoke isColliding, pac.playerObj.pos, wall1.pos, PAC_SIZE_POINT, WALL_SIZE_POINT
             ;.if edx == TRUE
             ;    mov pac.playerObj.speed.x, 0
@@ -803,7 +867,7 @@ gameManager proc p:dword
                 invoke moveGhost, addr ghost3
                 invoke moveGhost, addr ghost4
                 
-                invoke updateDirection, addr pac.playerObj
+                ;invoke updateDirection, addr pac.playerObj
                 
                 invoke fixCoordinates, addr pac
                 invoke fixCoordinates, addr ghost1
@@ -833,18 +897,22 @@ changePlayerSpeed proc uses eax addrPlayer : DWORD, direction : BYTE, keydown : 
         mov [eax].playerObj.speed.y, -PAC_SPEED
         mov [eax].playerObj.speed.x, 0
         mov [eax].stopped, 0
+        mov [eax].direction, D_TOP
     .elseif direction == 1 ; s / seta pra baixo
         mov [eax].playerObj.speed.y, PAC_SPEED
         mov [eax].playerObj.speed.x, 0
         mov [eax].stopped, 0
+        mov [eax].direction, D_DOWN
     .elseif direction == 2 ; a / seta pra esquerda
         mov [eax].playerObj.speed.x, -PAC_SPEED
         mov [eax].playerObj.speed.y, 0
         mov [eax].stopped, 0
+        mov [eax].direction, D_LEFT
     .elseif direction == 3 ; d / seta pra direita
         mov [eax].playerObj.speed.x, PAC_SPEED
         mov [eax].playerObj.speed.y, 0
         mov [eax].stopped, 0
+        mov [eax].direction, D_RIGHT
     .endif
 
 

@@ -132,15 +132,15 @@ pill ends
     pac player <<<600,500>,  <0,0>>, 0, 4, D_RIGHT> 
 
     ;instancia os fantasmas
-    ghost1 ghost <<<300,450>,  <0,0>>, 0, 1, D_RIGHT>
+    ghost1 ghost <<<300,300>,  <0,0>>, 0, 1, D_RIGHT>
     ghost2 ghost <<<300,400>,  <0,0>>, 0, 1, D_RIGHT>
-    ghost3 ghost <<<350,450>,  <0,0>>, 0, 1, D_RIGHT>
+    ghost3 ghost <<<100,300>,  <0,0>>, 0, 1, D_RIGHT>
     ghost4 ghost <<<350,400>,  <0,0>>, 0, 1, D_RIGHT>
 
     ;instancia as paredes
     ;[nome] wall <<x, y>>
-    wall1 wall  <<500, 400>>
-    wall2 wall  <<600, 400>>
+    wall1 wall  <<600, 400>>
+    wall2 wall  <<500, 200>>
 
     ;instancia as comidas
     ;[nome] food <<x, y>, [pontos]>
@@ -149,6 +149,8 @@ pill ends
     ;instancia as pílulas
     ;[nome] pill <<x, y>, [pontos], [tempo(s)]>
     pill1 pill <<150, 200>, 3000, 5>
+
+    tempPos point <0, 0>
     
     RIGHTARROW            BYTE 0
     
