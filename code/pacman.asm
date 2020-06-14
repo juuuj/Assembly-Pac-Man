@@ -116,20 +116,6 @@ isColliding proc obj1Pos:point, obj2Pos:point, obj1Size:point, obj2Size:point
 
 isColliding endp
 
-
-;______________________________________________________________________________
-;verifica se o pac está parado (bateu na parede)
-isStopped proc addrPlayer:dword
-assume edx:ptr player
-    mov edx, addrPlayer
-
-.if [edx].playerObj.speed.x == 0  && [edx].playerObj.speed.y == 0
-    mov [edx].stopped, 1
-.endif
-
-ret
-isStopped endp
-
 ;______________________________________________________________________________
 ;decide o background dependendo do gamestate
 paintBackground proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
@@ -194,7 +180,6 @@ paintPlayer proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
     mov ebx, PAC_SIZE
     mul ebx
     mov ecx, eax
-    invoke isStopped, addr pac
 
     mov eax, pac.playerObj.pos.x
     mov ebx, pac.playerObj.pos.y
@@ -283,24 +268,20 @@ paintGhosts proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
     ret
 paintGhosts endp
 
-;_______________________________________________________________________________
-paintWall proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC, addrWall:dword
-assume eax:ptr wall
-    mov eax, addrWall
+;________________________________________________________________________________
+paintPos proc _hMemDC:HDC, _hMemDC2:HDC, addrPoint:dword, addrPos:dword
+assume edx:ptr point
+assume ecx:ptr point
 
-    invoke SelectObject, _hMemDC2, WALL_TILE
+    mov edx, addrPoint
+    mov ecx, addrPos
 
-    mov eax, [eax].pos.x
-    mov ebx, [eax].pos.y
-    sub eax, WALL_HALF_SIZE_P.x
-    sub ebx, WALL_HALF_SIZE_P.y
-
-    invoke TransparentBlt, _hMemDC, eax, ebx,\
-        WALL_SIZE_POINT.x, WALL_SIZE_POINT.y, _hMemDC2,\
-        0, 0, WALL_SIZE_POINT.x, WALL_SIZE_POINT.y, 16777215
+    mov eax, [ecx].x
+    mov ebx, [ecx].y
+    invoke TransparentBlt, _hMemDC, eax, ebx, [edx].x, [edx].y, _hMemDC2, 0, 0, [edx].x, [edx].y, 16777215
 
 ret
-paintWall endp
+paintPos endp
 
 ;________________________________________________________________________________
 ;desenha os objetos do mapa (paredes, comida, pílulas)
@@ -308,29 +289,20 @@ paintMap proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
 
     ;________PAREDES________________________________________________________________
     invoke SelectObject, _hMemDC2, WALL_TILE
-    ;parede 1:
-    mov eax, wall1.pos.x
-    mov ebx, wall1.pos.y
-    invoke TransparentBlt, _hMemDC, eax, ebx, WALL_SIZE, WALL_SIZE, _hMemDC2, 0, 0, WALL_SIZE, WALL_SIZE, 16777215
-    mov eax, wall2.pos.x
-    mov ebx, wall2.pos.y
-    invoke TransparentBlt, _hMemDC, eax, ebx, WALL_SIZE, WALL_SIZE, _hMemDC2, 0, 0, WALL_SIZE, WALL_SIZE, 16777215
-    ;invoke paintWall, _hDC, _hMemDC, _hMemDC2, addr wall1
-    ;invoke paintWall, _hDC, _hMemDC, _hMemDC2, addr wall2
+
+    invoke paintPos, _hMemDC, _hMemDC2, addr WALL_SIZE_POINT, addr wall1.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr WALL_SIZE_POINT, addr wall2.pos
+
 
     ;________COMIDAS_________________________________________________________________
     invoke SelectObject, _hMemDC2, FOOD_IMG
-    ;comida 1:
-    mov eax, food1.pos.x
-    mov ebx, food1.pos.y
-    invoke TransparentBlt, _hMemDC, eax, ebx, FOOD_SIZE, FOOD_SIZE, _hMemDC2, 0, 0, FOOD_SIZE, FOOD_SIZE, 16777215
+
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food1.pos
 
     ;________PÍLULAS_________________________________________________________________
     invoke SelectObject, _hMemDC2, PILL_IMG
-    ;pílula 1:
-    mov eax, pill1.pos.x
-    mov ebx, pill1.pos.y
-    invoke TransparentBlt, _hMemDC, eax, ebx, PILL_SIZE, PILL_SIZE, _hMemDC2, 0, 0, PILL_SIZE, PILL_SIZE, 16777215
+
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr pill1.pos
 
     ret
 paintMap endp
@@ -399,106 +371,53 @@ assume eax:ptr gameObject
     mov tempPos.y, ebx
 
     .if direction == 0 ;right
-        add tempPos.x, 2
+        add tempPos.x, 4
     .elseif direction == 1 ;top
-        add tempPos.y, -2
+        add tempPos.y, -4
     .elseif direction == 2 ;left
-        add tempPos.x, -2
+        add tempPos.x, -4
     .elseif direction == 3 ;down
-        add tempPos.y, 2
+        add tempPos.y, 4
     .endif
 
     invoke isColliding, tempPos, wall1.pos, PAC_SIZE_POINT, WALL_SIZE_POINT
+    .if edx == TRUE
+        ret
+    .endif
+    invoke isColliding, tempPos, wall2.pos, PAC_SIZE_POINT, WALL_SIZE_POINT
+    .if edx == TRUE
+        ret
+    .endif
 
     pop ebx
 
-;assume eax:nothing
 ret
 willCollide endp
 ;______________________________________________________________________________
 ;função para o personagem se mover, baseado na velocidade
-movePlayer proc uses eax addrPlayer:dword
-    assume ecx:ptr gameObject
-    mov ecx, addrPlayer
+movePlayer proc uses eax
 
-    ;Horizontal
-    mov eax, [ecx].pos.x
-    mov ebx, [ecx].speed.x
-    .if bx > 7fh
-        or bx, 65280
+    invoke willCollide, pac.direction, addr pac.playerObj
+    .if edx == FALSE
+        mov eax, pac.playerObj.pos.x
+        mov ebx, pac.playerObj.speed.x
+        .if bx > 7fh
+            or bx, 65280
+        .endif
+        add eax, ebx
+        mov pac.playerObj.pos.x, eax
+        mov eax, pac.playerObj.pos.y
+        mov ebx, pac.playerObj.speed.y
+        .if bx > 7fh 
+            or bx, 65280
+        .endif
+        add ax, bx
+        mov pac.playerObj.pos.y, eax
     .endif
-
-    ;.if ebx > 0 ;direita
-    ;    print "direitasssssssss", 13, 10
-        ;invoke willCollide, D_RIGHT, addr [ecx]
-    ;.elseif ebx < 0 ;esquerda
-    ;    print "esquerdaaaaaaaaaaaaa", 13, 10
-        ;invoke willCollide, D_LEFT, addr [ecx]
-    ;.endif
-    add eax, ebx
-    mov [ecx].pos.x, eax
-
-    ;Vertical
-    mov eax, [ecx].pos.y
-    mov ebx, [ecx].speed.y
-    .if bx > 7fh 
-        or bx, 65280
-    .endif
-    add ax, bx
-    mov [ecx].pos.y, eax
-
-    assume ecx:nothing
     ret
 movePlayer endp
 
-
-;movePlayer proc
-
-    ;mov eax, pac.playerObj.speed.x
-    ;mov ebx, pac.playerObj.speed.y
-
-    ;invoke willCollide, pac.direction, addr pac.playerObj
-    ;.if edx == FALSE
-        
-
-
-        ;.if pac.direction == D_TOP
-        ;    add pac.playerObj.pos.y, -PAC_SPEED
-        ;.elseif pac.direction == D_RIGHT
-        ;    add pac.playerObj.pos.x, PAC_SPEED
-        ;.elseif pac.direction == D_DOWN
-        ;    add pac.playerObj.pos.y, PAC_SPEED
-        ;.elseif pac.direction == D_LEFT
-        ;    add pac.playerObj.pos.x, -PAC_SPEED
-        ;.endif
-    ;.endif
-
-;movePlayer endp
-
 ;______________________________________________________________________________
-;função para decidir a direção em que o pac está olhando (não decidimos se vamos usar desenhos diferentes)
-;updateDirection proc addrPlayer:dword 
-;assume eax:ptr player
-;    mov eax, addrPlayer
-;
-;    mov ebx, [eax].playerObj.speed.x ;ebx é a velocidade horizontal
-;    mov edx, [eax].playerObj.speed.y ;edx é a velocidade vertical
-;
-;    .if ebx != 0 || edx != 0
-;        .if ebx == 0 ;se o horizontal for 0, vai pra cima ou pra baixo verificando o edx
-;            .if edx > 7fh ;se for negativo, vai pra cima
-;                mov [eax].direction, D_TOP       
-;            .else ;se positivo, vai pra baixo
-;                mov [eax].direction, D_DOWN     
-;            .endif 
-;        .elseif ebx > 7fh ;se a velocidade horizontal for negativa, vai pra esquerda
-;            mov [eax].direction, D_LEFT 
-;        .else ;se não, vai pra direita
-;            mov [eax].direction, D_RIGHT  
-;        .endif
-;    .endif
-;    ret
-;updateDirection endp
 
 updateGhostDirection proc addrGhost:dword 
 assume eax:ptr ghost
@@ -548,54 +467,29 @@ moveGhost proc uses eax addrGhost:dword
     ret
 moveGhost endp
 ;______________________________________________________________________________
-;função para o pac n sair da tela, mas sim voltar pelo outro lado
-fixCoordinates proc addrPlayer:dword
-assume eax:ptr player
-    mov eax, addrPlayer
+;função para um objeto n sair da tela, mas sim voltar pelo outro lado
+fixCoordinates proc addrObj:dword
+assume eax:ptr gameObject
+    mov eax, addrObj
 
-    .if [eax].playerObj.pos.x > WINDOW_SIZE_X && [eax].playerObj.pos.x < 80000000h
-        mov [eax].playerObj.pos.x, 20
+    .if [eax].pos.x > WINDOW_SIZE_X && [eax].pos.x < 80000000h
+        mov [eax].pos.x, 20
     .endif
 
-    .if [eax].playerObj.pos.x <= 10 || [eax].playerObj.pos.x > 80000000h
-        mov [eax].playerObj.pos.x, WINDOW_SIZE_X - 20 
+    .if [eax].pos.x <= 10 || [eax].pos.x > 80000000h
+        mov [eax].pos.x, WINDOW_SIZE_X - 20 
     .endif
 
-    .if [eax].playerObj.pos.y > WINDOW_SIZE_Y - 70 && [eax].playerObj.pos.y < 80000000h
-        mov [eax].playerObj.pos.y, 20
+    .if [eax].pos.y > WINDOW_SIZE_Y - 70 && [eax].pos.y < 80000000h
+        mov [eax].pos.y, 20
     .endif
 
-    .if [eax].playerObj.pos.y <= 10 || [eax].playerObj.pos.y > 80000000h
-        mov [eax].playerObj.pos.y, WINDOW_SIZE_Y - 80 
+    .if [eax].pos.y <= 10 || [eax].pos.y > 80000000h
+        mov [eax].pos.y, WINDOW_SIZE_Y - 80 
     .endif
 assume eax:nothing
 ret
 fixCoordinates endp
-
-;______________________________________________________________________________
-;função para o fantasma n sair da tela, mas sim voltar pelo outro lado
-fixGhostCoordinates proc addrGhost:dword
-assume eax:ptr ghost
-    mov eax, addrGhost
-
-    .if [eax].ghostObj.pos.x > WINDOW_SIZE_X && [eax].ghostObj.pos.x < 80000000h
-        mov [eax].ghostObj.pos.x, 20                  
-    .endif
-
-    .if [eax].ghostObj.pos.x <= 10 || [eax].ghostObj.pos.x > 80000000h
-        mov [eax].ghostObj.pos.x, 1180 
-    .endif
-
-    .if [eax].ghostObj.pos.y > WINDOW_SIZE_Y - 80 && [eax].ghostObj.pos.y < 80000000h
-        mov [eax].ghostObj.pos.y, 20
-    .endif
-
-    .if [eax].ghostObj.pos.y <= 10 || [eax].ghostObj.pos.y > 80000000h
-        mov [eax].ghostObj.pos.y, WINDOW_SIZE_Y - 90 
-    .endif
-assume eax:nothing
-ret
-fixGhostCoordinates endp
 
 ;_____________________________________________________________________________
 colideWithWall proc addrWall:dword
@@ -606,7 +500,6 @@ assume eax:ptr wall
         .if edx == TRUE
             mov pac.playerObj.speed.x, 0
             mov pac.playerObj.speed.y, 0
-            mov pac.stopped, 1 ;n sei pra q a gnt vai usar isso mas sla né
         .endif
 assume eax:nothing
 ret
@@ -667,8 +560,6 @@ gameOver proc
     
     mov pac.playerObj.speed.x, 0
     mov pac.playerObj.speed.y, 0
-
-    mov pac.stopped, 1
 
     mov pac.life, 4
 
@@ -861,7 +752,7 @@ gameManager proc p:dword
             ;        invoke updateScreen
             ;    .endif
 
-                invoke movePlayer, addr pac
+                invoke movePlayer
                 invoke moveGhost, addr ghost1
                 invoke moveGhost, addr ghost2
                 invoke moveGhost, addr ghost3
@@ -869,11 +760,11 @@ gameManager proc p:dword
                 
                 ;invoke updateDirection, addr pac.playerObj
                 
-                invoke fixCoordinates, addr pac
-                invoke fixCoordinates, addr ghost1
-                invoke fixCoordinates, addr ghost2
-                invoke fixCoordinates, addr ghost3
-                invoke fixCoordinates, addr ghost4
+                invoke fixCoordinates, addr pac.playerObj
+                invoke fixCoordinates, addr ghost1.ghostObj
+                invoke fixCoordinates, addr ghost2.ghostObj
+                invoke fixCoordinates, addr ghost3.ghostObj
+                invoke fixCoordinates, addr ghost4.ghostObj
 
         .endw 
     
@@ -889,32 +780,25 @@ gameManager endp
 ;_____________________________________________________________________________________________________________________________
 
 ;muda a velocidade do pac dependendo da tecla q foi apertada
-changePlayerSpeed proc uses eax addrPlayer : DWORD, direction : BYTE, keydown : BYTE 
-    assume eax: ptr player
-    mov eax, addrPlayer
+changePlayerSpeed proc direction : BYTE
 
-    .if direction == 0 ; w / seta pra cima
-        mov [eax].playerObj.speed.y, -PAC_SPEED
-        mov [eax].playerObj.speed.x, 0
-        mov [eax].stopped, 0
-        mov [eax].direction, D_TOP
-    .elseif direction == 1 ; s / seta pra baixo
-        mov [eax].playerObj.speed.y, PAC_SPEED
-        mov [eax].playerObj.speed.x, 0
-        mov [eax].stopped, 0
-        mov [eax].direction, D_DOWN
-    .elseif direction == 2 ; a / seta pra esquerda
-        mov [eax].playerObj.speed.x, -PAC_SPEED
-        mov [eax].playerObj.speed.y, 0
-        mov [eax].stopped, 0
-        mov [eax].direction, D_LEFT
-    .elseif direction == 3 ; d / seta pra direita
-        mov [eax].playerObj.speed.x, PAC_SPEED
-        mov [eax].playerObj.speed.y, 0
-        mov [eax].stopped, 0
-        mov [eax].direction, D_RIGHT
+    .if direction == D_TOP ; w / seta pra cima
+        mov pac.playerObj.speed.y, -PAC_SPEED
+        mov pac.playerObj.speed.x, 0
+        mov pac.direction, D_TOP
+    .elseif direction == D_DOWN ; s / seta pra baixo
+        mov pac.playerObj.speed.y, PAC_SPEED
+        mov pac.playerObj.speed.x, 0
+        mov pac.direction, D_DOWN
+    .elseif direction == D_LEFT ; a / seta pra esquerda
+        mov pac.playerObj.speed.x, -PAC_SPEED
+        mov pac.playerObj.speed.y, 0
+        mov pac.direction, D_LEFT
+    .elseif direction == D_RIGHT ; d / seta pra direita
+        mov pac.playerObj.speed.x, PAC_SPEED
+        mov pac.playerObj.speed.y, 0
+        mov pac.direction, D_RIGHT
     .endif
-
 
     assume ecx: nothing
     ret
@@ -982,9 +866,7 @@ WinMain endp
 
 WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM 
     LOCAL direction : BYTE
-    LOCAL keydown   : BYTE
     mov direction, -1
-    mov keydown, -1
 
     ;quando ele recebe uma mensagem, lê qual é
     .IF uMsg == WM_CREATE ;se ainda for a primeira, tem q cirar tudo
@@ -1013,37 +895,30 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
             .endif
         .endif
 
-    .ELSEIF uMsg == WM_KEYDOWN ;se soltou a tecla
-    ;(aperentemente n vai fazer nada pro nosso codigo mas dps a gnt ve se pode tirar mesmo)
+    .ELSEIF uMsg == WM_KEYDOWN ;se o usuario apertou alguma tecla
 
         .if (wParam == 77h || wParam == 57h || wParam == VK_UP) ;w ou seta pra cima
             print "cima", 13,10
-            mov keydown, FALSE
-            mov direction, 0
+            mov direction, D_TOP
 
         .elseif (wParam == 61h || wParam == 41h || wParam == VK_LEFT) ;a ou seta pra esquerda
             print "esquerda", 13,10
-            mov keydown, FALSE
-            mov direction, 2
+            mov direction, D_LEFT
 
         .elseif (wParam == 73h || wParam == 53h || wParam == VK_DOWN) ;s ou seta pra baixo
             print "baixo", 13,10
-            mov keydown, FALSE
-            mov direction, 1
+            mov direction, D_DOWN
 
         .elseif (wParam == 64h || wParam == 44h || wParam == VK_RIGHT) ;d ou seta pra direita
             print "direita", 13,10
-            mov keydown, FALSE
-            mov direction, 3
+            mov direction, D_RIGHT
         .endif
 
         .if direction != -1
-            invoke changePlayerSpeed, ADDR pac, direction, keydown
+            invoke changePlayerSpeed, direction
             mov direction, -1
-            mov keydown, -1
         .endif
 
-    ;.endif
 ;________________________________________________________________________________
 
     .ELSE ;se n for nada de importante faz o padrão mesmo isso n importa 

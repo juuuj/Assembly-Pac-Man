@@ -133,9 +133,9 @@ pill ends
 
     ;instancia os fantasmas
     ghost1 ghost <<<300,300>,  <0,0>>, 0, 1, D_RIGHT>
-    ghost2 ghost <<<300,400>,  <0,0>>, 0, 1, D_RIGHT>
+    ghost2 ghost <<<300,400>,  <0,0>>, 0, 1, D_LEFT>
     ghost3 ghost <<<100,300>,  <0,0>>, 0, 1, D_RIGHT>
-    ghost4 ghost <<<350,400>,  <0,0>>, 0, 1, D_RIGHT>
+    ghost4 ghost <<<350,400>,  <0,0>>, 0, 1, D_LEFT>
 
     ;instancia as paredes
     ;[nome] wall <<x, y>>
