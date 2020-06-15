@@ -573,22 +573,25 @@ colideWithWall endp
 hitGhost proc addrGhost:dword
 assume ecx:ptr ghost
 
+    mov ecx, addrGhost
     invoke isColliding, pac.playerObj.pos, [ecx].ghostObj.pos, PAC_SIZE_POINT, GHOST_SIZE_POINT
     .if edx == TRUE
         .if [ecx].afraid == 0 ; se o fantasma matar o pac
             ;vai para posição de reinício
-            invoke reposition, addr pac.playerObj
             mov pac.direction, D_RIGHT
+            invoke reposition, addr pac.playerObj
 
-            add pac.life, -1 ;perde uma vida
+            dec pac.life ;perde uma vida
             .if pac.life == 0 ;se for a última morreu
                 invoke gameOver
                 mov GAMESTATE, 3 ;perdeu
                 ;.continue
+                ret
             .endif
+            
         .else ;se o pacman estiver buffado e conseguir matar
             ;reinicia o fantasma pro meio
-            invoke restartGhost, ecx
+            invoke restartGhost, addr [ecx]
         .endif
     .endif
 
@@ -660,154 +663,31 @@ gameManager proc p:dword
         .while GAMESTATE == 2 ;jogo
             invoke Sleep, 30
 
-            ;invoke hitGhost, addr ghost1
-            ;verifica se o pac tocou no fantasma 1
-            invoke isColliding, pac.playerObj.pos, ghost1.ghostObj.pos, PAC_SIZE_POINT, GHOST_SIZE_POINT
-            .if edx == TRUE
-                .if ghost1.afraid == 0 ; se o fantasma matar o pac
-                    ;vai para posição de reinício
-                    mov pac.playerObj.pos.x, 1120
-                    mov pac.playerObj.pos.y, 350;
+            ;verifica se bateu nos fantasmas
+            invoke hitGhost, addr ghost1
+            invoke hitGhost, addr ghost2 
+            invoke hitGhost, addr ghost3
+            invoke hitGhost, addr ghost4
 
-                    dec pac.life ;perde uma vida
-                    .if pac.life == 0 ;se for a última morreu
-                        invoke gameOver
-                        mov GAMESTATE, 3 ;perdeu
-                        .continue
-                    .endif
-                .else ;se o pacman estiver buffado e conseguir matar
-                    ;reinicia o fantasma pro meio
-                    mov ghost1.ghostObj.pos.x, 1120
-                    mov ghost1.ghostObj.pos.y, 350
-                    mov ghost1.afraid, 0
-                    mov ghost1.alive, 1
-                .endif
-            .endif
-
-            ;verifica se o pac tocou no fantasma 2
-            invoke isColliding, pac.playerObj.pos, ghost2.ghostObj.pos, PAC_SIZE_POINT, GHOST_SIZE_POINT
-            .if edx == TRUE
-                .if ghost2.afraid == 0 ; se o fantasma matar o pac
-                    ;vai para posição de reinício
-                    mov pac.playerObj.pos.x, 1120
-                    mov pac.playerObj.pos.y, 350
-
-                    dec pac.life ;perde uma vida
-                    .if pac.life == 0 ;se for a última morreu
-                        invoke gameOver
-                        mov GAMESTATE, 3 ;perdeu
-                        .continue
-                    .endif
-                .else ;se o pacman estiver buffado e conseguir matar
-                    ;reinicia o fantasma pro meio
-                    mov ghost2.ghostObj.pos.x, 1120
-                    mov ghost2.ghostObj.pos.y, 350
-                    mov ghost2.afraid, 0
-                    mov ghost2.alive, 1
-                .endif
-            .endif
-
-            ;verifica se o pac tocou no fantasma 3
-            invoke isColliding, pac.playerObj.pos, ghost3.ghostObj.pos, PAC_SIZE_POINT, GHOST_SIZE_POINT
-            .if edx == TRUE
-                .if ghost3.afraid == 0 ; se o fantasma matar o pac
-                    ;vai para posição de reinício
-                    mov pac.playerObj.pos.x, 1120
-                    mov pac.playerObj.pos.y, 350
-
-                    dec pac.life ;perde uma vida
-                    .if pac.life == 0 ;se for a última morreu
-                        invoke gameOver
-                        mov GAMESTATE, 3 ;perdeu
-                        .continue
-                    .endif
-                .else ;se o pacman estiver buffado e conseguir matar
-                    ;reinicia o fantasma pro meio
-                    mov ghost3.ghostObj.pos.x, 1120
-                    mov ghost3.ghostObj.pos.y, 350
-                    mov ghost3.afraid, 0
-                    mov ghost3.alive, 1
-                .endif
-            .endif
-
-            ;verifica se o pac tocou no fantasma 4
-            invoke isColliding, pac.playerObj.pos, ghost4.ghostObj.pos, PAC_SIZE_POINT, GHOST_SIZE_POINT
-            .if edx == TRUE
-                .if ghost4.afraid == 0 ; se o fantasma matar o pac
-                    ;vai para posição de reinício
-                    mov pac.playerObj.pos.x, 1120
-                    mov pac.playerObj.pos.y, 350
-
-                    dec pac.life ;perde uma vida
-                    .if pac.life == 0 ;se for a última morreu
-                        invoke gameOver
-                        mov GAMESTATE, 3 ;perdeu
-                        .continue
-                    .endif
-                .else ;se o pacman estiver buffado e conseguir matar
-                    ;reinicia o fantasma pro meio
-                    mov ghost4.ghostObj.pos.x, 1120
-                    mov ghost4.ghostObj.pos.y, 350
-                    mov ghost4.afraid, 0
-                    mov ghost4.alive, 1
-                .endif
-            .endif
-
-            ;colisão entre o pac e a parede
-            ;invoke colideWithWall, addr wall1
-            ;invoke colideWithWall, addr wall2
-            ;invoke isColliding, pac.playerObj.pos, wall1.pos, PAC_SIZE_POINT, WALL_SIZE_POINT
-            ;.if edx == TRUE
-            ;    mov pac.playerObj.speed.x, 0
-            ;    mov pac.playerObj.speed.y, 0
-            ;    mov pac.stopped, 1 ;n sei pra q a gnt vai usar isso mas sla né
-            ;.endif
-
-            ;Talvez seja melhor pensar em um jeito melhor de fazer as paredes, pq vai ter q ter uma colisão de cada fantasma com cada parede e vai ficar enorme
-
-            ;colisão entre o pac e as comidas
+            ;verifica se tocou nas comidas
             invoke colideWithFood, addr food1
-            ;invoke isColliding, pac.playerObj.pos, food1.pos, PAC_SIZE_POINT, FOOD_SIZE_POINT
-            ;    .if edx == TRUE
-            ;        add score, 10 ;ganha pontos
-            ;        add food_left, -1
-            ;        .if food_left == 0 ;se as comidas acabarem
-            ;            mov GAMESTATE, 4 ;ganhou
-            ;        .endif
-            ;    .endif
 
-            ;colisão entre o pac e as pílulas
+            ;verifica se tocou nas pílulas
             invoke colideWithPill, addr pill1
-            ;invoke isColliding, pac.playerObj.pos, pill1.pos, PAC_SIZE_POINT, PILL_SIZE_POINT
-            ;    .if edx == TRUE
-            ;        add score, 30 ;ganha pontos
-            ;        mov ghost1.afraid, 1
-            ;        mov ghost2.afraid, 1
-            ;        mov ghost3.afraid, 1
-            ;        mov ghost4.afraid, 1
-            ;        invoke updateScreen
-            ;        ;espera para eles voltarem ao normal
-            ;        invoke Sleep, pill1.time
-            ;        mov ghost1.afraid, 0
-            ;        mov ghost2.afraid, 0
-            ;        mov ghost3.afraid, 0
-            ;        mov ghost4.afraid, 0
-            ;        invoke updateScreen
-            ;    .endif
 
-                invoke movePlayer
-                invoke moveGhost, addr ghost1
-                invoke moveGhost, addr ghost2
-                invoke moveGhost, addr ghost3
-                invoke moveGhost, addr ghost4
-                
-                ;invoke updateDirection, addr pac.playerObj
-                
-                invoke fixCoordinates, addr pac.playerObj
-                invoke fixCoordinates, addr ghost1.ghostObj
-                invoke fixCoordinates, addr ghost2.ghostObj
-                invoke fixCoordinates, addr ghost3.ghostObj
-                invoke fixCoordinates, addr ghost4.ghostObj
+            ;move o player e os fantasmas
+            invoke movePlayer
+            invoke moveGhost, addr ghost1
+            invoke moveGhost, addr ghost2
+            invoke moveGhost, addr ghost3
+            invoke moveGhost, addr ghost4
+            
+            ;volta o player e os fantasmas se eles tiverem passado do limite
+            invoke fixCoordinates, addr pac.playerObj
+            invoke fixCoordinates, addr ghost1.ghostObj
+            invoke fixCoordinates, addr ghost2.ghostObj
+            invoke fixCoordinates, addr ghost3.ghostObj
+            invoke fixCoordinates, addr ghost4.ghostObj
 
         .endw 
     
