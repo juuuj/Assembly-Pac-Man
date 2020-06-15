@@ -20,10 +20,12 @@ gameObject ends
 
 ;classe do player
 player struct
-    playerObj       gameObject <>
-    stopped               BYTE 0
-    life                  BYTE 4
-    direction             BYTE 0
+    playerObj           gameObject <>
+    stopped             BYTE 0
+    life                BYTE 4
+    direction           BYTE 0
+    animation           BYTE 0
+    anim_counter        dd 0
 player ends
 
 ;fantasma
@@ -108,13 +110,22 @@ pill ends
     h_background        dd 0
     h_loading           dd 0
     h_menu              dd 0
-    P1      dd 0
-    P2      dd 0
+
     G0      dd 0
     G1      dd 0
     G2      dd 0
     G3      dd 0
     G4      dd 0
+
+    PAC_RIGHT_OPEN      dd 0
+    PAC_RIGHT_CLOSED    dd 0
+    PAC_TOP_OPEN        dd 0
+    PAC_TOP_CLOSED      dd 0
+    PAC_LEFT_OPEN       dd 0
+    PAC_LEFT_CLOSED     dd 0
+    PAC_DOWN_OPEN       dd 0
+    PAC_DOWN_CLOSED     dd 0
+
     p_won               dd 0
     game_over           dd 0
 
@@ -129,7 +140,7 @@ pill ends
     over byte 0 ;
 
     ;instancia o pac
-    pac player <<<600,500>,  <0,0>>, 0, 4, D_RIGHT> 
+    pac player <<<600,500>,  <0,0>>, 0, 4, D_RIGHT, 0, 0> 
 
     ;instancia os fantasmas
     ghost1 ghost <<<300,300>,  <0,0>>, 0, 1, D_RIGHT>

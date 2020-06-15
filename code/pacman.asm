@@ -52,10 +52,23 @@ loadImages proc
     mov G4, eax
 
     ;Carregando as imagens do pac:
-    invoke LoadBitmap, hInstance, 105
-    mov P1, eax
-    invoke LoadBitmap, hInstance, 106
-    mov P2, eax
+    invoke LoadBitmap, hInstance, 115
+    mov PAC_RIGHT_OPEN, eax
+    invoke LoadBitmap, hInstance, 116
+    mov PAC_RIGHT_CLOSED, eax
+    invoke LoadBitmap, hInstance, 117
+    mov PAC_TOP_OPEN, eax
+    invoke LoadBitmap, hInstance, 118
+    mov PAC_TOP_CLOSED, eax
+    invoke LoadBitmap, hInstance, 119
+    mov PAC_LEFT_OPEN, eax
+    invoke LoadBitmap, hInstance, 120
+    mov PAC_LEFT_CLOSED, eax
+    invoke LoadBitmap, hInstance, 121
+    mov PAC_DOWN_OPEN, eax
+    invoke LoadBitmap, hInstance, 122
+    mov PAC_DOWN_CLOSED, eax
+
 
     ;Imagens de coisas do mapa:
     invoke LoadBitmap, hInstance, 112
@@ -151,10 +164,10 @@ paintBackground proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
     ret
 paintBackground endp
 
-;______________________________________________________________________________
+;____________________________________________________________________________
 ;pinta a quantidade de vidas na tela
 paintLifes proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
-    invoke SelectObject, _hMemDC2, P1 ;(a vida tem a imagem do pac man)
+    invoke SelectObject, _hMemDC2, PAC_RIGHT_OPEN ;(a vida tem a imagem do pac man)
     mov ebx, 0
     movzx ecx, pac.life ;guarda quantas vidas ele tem
     .while ebx != ecx 
@@ -170,25 +183,68 @@ paintLifes proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
 
     ret
 paintLifes endp
-;______________________________________________________________________________
+
+;____________________________________________________________________________
+paintPos proc _hMemDC:HDC, _hMemDC2:HDC, addrPoint:dword, addrPos:dword
+assume edx:ptr point
+assume ecx:ptr point
+
+    mov edx, addrPoint
+    mov ecx, addrPos
+
+    mov eax, [ecx].x
+    mov ebx, [ecx].y
+    invoke TransparentBlt, _hMemDC, eax, ebx, [edx].x, [edx].y, _hMemDC2, 0, 0, [edx].x, [edx].y, 16777215
+
+ret
+paintPos endp
+;____________________________________________________________________________
+decideAnimation proc
+
+    .if pac.animation == 0
+        .if pac.direction == D_RIGHT
+            mov edx, PAC_RIGHT_OPEN
+        .elseif pac.direction == D_TOP
+            mov edx, PAC_TOP_OPEN
+        .elseif pac.direction == D_LEFT
+            mov edx, PAC_LEFT_OPEN
+        .elseif pac.direction == D_DOWN
+            mov edx, PAC_DOWN_OPEN
+        .endif
+    .elseif pac.animation == 1
+        .if pac.direction == D_RIGHT
+            mov edx, PAC_RIGHT_CLOSED
+        .elseif pac.direction == D_TOP
+            mov edx, PAC_TOP_CLOSED
+        .elseif pac.direction == D_LEFT
+            mov edx, PAC_LEFT_CLOSED
+        .elseif pac.direction == D_DOWN
+            mov edx, PAC_DOWN_CLOSED
+        .endif
+    .endif
+
+    .if pac.anim_counter >= 20
+        mov pac.animation, 1
+    .elseif pac.anim_counter <= 0
+        mov pac.animation, 0
+    .endif
+
+    .if pac.animation == 0
+        add pac.anim_counter, 1
+    .elseif pac.animation == 1
+        add pac.anim_counter, -1
+    .endif
+ret
+decideAnimation endp
+;____________________________________________________________________________
 ;desenha o pac na tela
 paintPlayer proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
 
-    invoke SelectObject, _hMemDC2, P1
+    invoke decideAnimation
 
-    movsx eax, pac.direction
-    mov ebx, PAC_SIZE
-    mul ebx
-    mov ecx, eax
+    invoke SelectObject, _hMemDC2, edx
 
-    mov eax, pac.playerObj.pos.x
-    mov ebx, pac.playerObj.pos.y
-    sub eax, PAC_HALF_SIZE_P.x
-    sub ebx, PAC_HALF_SIZE_P.y
-
-    invoke TransparentBlt, _hMemDC, eax, ebx,\
-        PAC_SIZE, PAC_SIZE, _hMemDC2,\
-        0, 0, PAC_SIZE, PAC_SIZE, 16777215
+    invoke paintPos, _hMemDC, _hMemDC2, addr PAC_SIZE_POINT, addr pac.playerObj.pos
 
     ret
 paintPlayer endp
@@ -204,15 +260,7 @@ paintGhosts proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
         invoke SelectObject, _hMemDC2, G1
     .endif
 
-    mov eax, ghost1.ghostObj.pos.x
-    mov ebx, ghost1.ghostObj.pos.y
-    sub eax, GHOST_HALF_SIZE_P.x
-    sub ebx, GHOST_HALF_SIZE_P.y
-
-    invoke TransparentBlt, _hMemDC, eax, ebx,\
-        GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, _hMemDC2,\
-        0, 0, GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, 16777215
-
+    invoke paintPos, _hMemDC, _hMemDC2, addr GHOST_SIZE_POINT, addr ghost1.ghostObj.pos
 
 ;Fantasma 2:
 
@@ -222,14 +270,7 @@ paintGhosts proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
         invoke SelectObject, _hMemDC2, G2
     .endif
 
-    mov eax, ghost2.ghostObj.pos.x
-    mov ebx, ghost2.ghostObj.pos.y
-    sub eax, GHOST_HALF_SIZE_P.x
-    sub ebx, GHOST_HALF_SIZE_P.y
-
-    invoke TransparentBlt, _hMemDC, eax, ebx,\
-        GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, _hMemDC2,\
-        0, 0, GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, 16777215
+    invoke paintPos, _hMemDC, _hMemDC2, addr GHOST_SIZE_POINT, addr ghost2.ghostObj.pos
 
 ;Fantasma 3:
 
@@ -239,14 +280,7 @@ paintGhosts proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
         invoke SelectObject, _hMemDC2, G3
     .endif
 
-    mov eax, ghost3.ghostObj.pos.x
-    mov ebx, ghost3.ghostObj.pos.y
-    sub eax, GHOST_HALF_SIZE_P.x
-    sub ebx, GHOST_HALF_SIZE_P.y
-
-    invoke TransparentBlt, _hMemDC, eax, ebx,\
-        GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, _hMemDC2,\
-        0, 0, GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, 16777215
+    invoke paintPos, _hMemDC, _hMemDC2, addr GHOST_SIZE_POINT, addr ghost3.ghostObj.pos
 
 ;Fantasma 4:
 
@@ -256,32 +290,10 @@ paintGhosts proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
         invoke SelectObject, _hMemDC2, G4
     .endif
 
-    mov eax, ghost4.ghostObj.pos.x
-    mov ebx, ghost4.ghostObj.pos.y
-    sub eax, GHOST_HALF_SIZE_P.x
-    sub ebx, GHOST_HALF_SIZE_P.y
-
-    invoke TransparentBlt, _hMemDC, eax, ebx,\
-        GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, _hMemDC2,\
-        0, 0, GHOST_SIZE_POINT.x, GHOST_SIZE_POINT.y, 16777215
+    invoke paintPos, _hMemDC, _hMemDC2, addr GHOST_SIZE_POINT, addr ghost4.ghostObj.pos
 
     ret
 paintGhosts endp
-
-;________________________________________________________________________________
-paintPos proc _hMemDC:HDC, _hMemDC2:HDC, addrPoint:dword, addrPos:dword
-assume edx:ptr point
-assume ecx:ptr point
-
-    mov edx, addrPoint
-    mov ecx, addrPos
-
-    mov eax, [ecx].x
-    mov ebx, [ecx].y
-    invoke TransparentBlt, _hMemDC, eax, ebx, [edx].x, [edx].y, _hMemDC2, 0, 0, [edx].x, [edx].y, 16777215
-
-ret
-paintPos endp
 
 ;________________________________________________________________________________
 ;desenha os objetos do mapa (paredes, comida, pílulas)
