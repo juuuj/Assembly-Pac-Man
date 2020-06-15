@@ -309,12 +309,12 @@ paintMap proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
     ;________COMIDAS_________________________________________________________________
     invoke SelectObject, _hMemDC2, FOOD_IMG
 
-    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food1.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food1.foodObj.pos
 
     ;________PÍLULAS_________________________________________________________________
     invoke SelectObject, _hMemDC2, PILL_IMG
 
-    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr pill1.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr pill1.pillObj.pos
 
     ret
 paintMap endp
@@ -503,6 +503,58 @@ assume eax:nothing
 ret
 fixCoordinates endp
 
+;______________________________________________________________________________
+reposition proc uses eax ebx addrObj:dword
+assume ecx:ptr  gameObject
+    mov ecx, addrObj
+
+    mov eax, [ecx].initPos.x
+    mov ebx, [ecx].initPos.y
+
+    mov [ecx].pos.x, eax
+    mov [ecx].pos.y, ebx 
+
+    mov [ecx].speed.x, 0
+    mov [ecx].speed.y, 0
+
+ret
+reposition endp
+;______________________________________________________________________________
+restartGhost proc addrGhost:dword
+assume eax: ptr ghost
+    mov eax, addrGhost
+    
+    mov [eax].afraid, 0
+    mov [eax].alive, 1
+    mov [eax].direction, D_RIGHT
+    invoke reposition, addr [eax].ghostObj
+
+ret
+restartGhost endp
+;______________________________________________________________________________
+;reposiciona tudo no lugar quando o jogo acaba
+gameOver proc
+
+    mov pac.life, 4
+    mov pac.direction, D_RIGHT
+    invoke reposition, addr pac.playerObj
+
+    invoke restartGhost, addr ghost1
+    invoke restartGhost, addr ghost2
+    invoke restartGhost, addr ghost3
+    invoke restartGhost, addr ghost4
+
+    invoke reposition, addr food1.foodObj
+    invoke reposition, addr pill1.pillObj
+
+    mov food_left, 1
+    mov score, 0
+
+    invoke updateScreen
+
+    ret
+gameOver endp
+
 ;_____________________________________________________________________________
 colideWithWall proc addrWall:dword
 assume eax:ptr wall
@@ -517,20 +569,45 @@ assume eax:nothing
 ret
 colideWithWall endp
 
+;_____________________________________________________________________________
+hitGhost proc addrGhost:dword
+assume ecx:ptr ghost
 
+    invoke isColliding, pac.playerObj.pos, [ecx].ghostObj.pos, PAC_SIZE_POINT, GHOST_SIZE_POINT
+    .if edx == TRUE
+        .if [ecx].afraid == 0 ; se o fantasma matar o pac
+            ;vai para posição de reinício
+            invoke reposition, addr pac.playerObj
+            mov pac.direction, D_RIGHT
+
+            add pac.life, -1 ;perde uma vida
+            .if pac.life == 0 ;se for a última morreu
+                invoke gameOver
+                mov GAMESTATE, 3 ;perdeu
+                ;.continue
+            .endif
+        .else ;se o pacman estiver buffado e conseguir matar
+            ;reinicia o fantasma pro meio
+            invoke restartGhost, ecx
+        .endif
+    .endif
+
+ret
+hitGhost endp
 
 ;_____________________________________________________________________________
 colideWithFood proc addrFood:dword
 assume eax:ptr food
     mov eax, addrFood
    
-    invoke isColliding, pac.playerObj.pos, [eax].pos, PAC_SIZE_POINT, FOOD_SIZE_POINT
+    invoke isColliding, pac.playerObj.pos, [eax].foodObj.pos, PAC_SIZE_POINT, FOOD_SIZE_POINT
         .if edx == TRUE
-            mov [eax].pos.x, -100
-            mov [eax].pos.y, -100
+            mov [eax].foodObj.pos.x, -100
+            mov [eax].foodObj.pos.y, -100
             add score, 10 ;ganha pontos
             add food_left, -1
             .if food_left == 0 ;se as comidas acabarem
+                invoke gameOver
                 mov GAMESTATE, 4 ;ganhou
             .endif
         .endif
@@ -543,10 +620,10 @@ colideWithPill proc addrPill:dword
 assume eax:ptr pill
     mov eax, addrPill
    
-    invoke isColliding, pac.playerObj.pos, [eax].pos, PAC_SIZE_POINT, PILL_SIZE_POINT
+    invoke isColliding, pac.playerObj.pos, [eax].pillObj.pos, PAC_SIZE_POINT, PILL_SIZE_POINT
         .if edx == TRUE
-            mov [eax].pos.x, -100
-            mov [eax].pos.y, -100
+            mov [eax].pillObj.pos.x, -100
+            mov [eax].pillObj.pos.y, -100
             add score, 30 ;ganha pontos
             mov ghost1.afraid, 1
             mov ghost2.afraid, 1
@@ -564,53 +641,6 @@ assume eax:ptr pill
 
 ret
 colideWithPill endp
-;______________________________________________________________________________
-;reposiciona tudo no lugar quando o jogo acaba
-gameOver proc
-    mov pac.playerObj.pos.x, 600
-    mov pac.playerObj.pos.y, 500 
-    
-    mov pac.playerObj.speed.x, 0
-    mov pac.playerObj.speed.y, 0
-
-    mov pac.life, 4
-
-    mov pac.direction, D_RIGHT
-
-    mov ghost1.ghostObj.speed.x, 0
-    mov ghost1.ghostObj.speed.y, 0
-    mov ghost1.ghostObj.pos.x, 300
-    mov ghost1.ghostObj.pos.y, 450
-    mov ghost1.afraid, 1 
-    mov ghost1.alive, 0
-    mov ghost1.direction, D_RIGHT
-
-    mov ghost2.ghostObj.speed.x, 0
-    mov ghost2.ghostObj.speed.y, 0
-    mov ghost2.ghostObj.pos.x, 300
-    mov ghost2.ghostObj.pos.y, 400
-    mov ghost2.afraid, 0
-    mov ghost2.alive, 1
-    mov ghost2.direction, D_RIGHT
-
-    mov ghost3.ghostObj.speed.x, 0
-    mov ghost3.ghostObj.speed.y, 0
-    mov ghost3.ghostObj.pos.x, 350
-    mov ghost3.ghostObj.pos.y, 450
-    mov ghost3.afraid, 0
-    mov ghost3.alive, 1
-    mov ghost3.direction, D_RIGHT
-
-    mov ghost4.ghostObj.speed.x, 0
-    mov ghost4.ghostObj.speed.y, 0
-    mov ghost4.ghostObj.pos.x, 350
-    mov ghost4.ghostObj.pos.y, 400
-    mov ghost4.afraid, 0
-    mov ghost4.alive, 1
-    mov ghost4.direction, D_RIGHT
-
-    ret
-gameOver endp
 
 ;______________________________________________________________________________
 ;função principal para o jogo agir de acordo com o gamestate
@@ -618,7 +648,7 @@ gameManager proc p:dword
         LOCAL area:RECT
 
         .if GAMESTATE == 0 ;tela de loading (espera 3s e passa para o próximo)
-            invoke Sleep, 3000
+            invoke Sleep, 2000
             inc GAMESTATE
         .endif
 
@@ -630,13 +660,14 @@ gameManager proc p:dword
         .while GAMESTATE == 2 ;jogo
             invoke Sleep, 30
 
+            ;invoke hitGhost, addr ghost1
             ;verifica se o pac tocou no fantasma 1
             invoke isColliding, pac.playerObj.pos, ghost1.ghostObj.pos, PAC_SIZE_POINT, GHOST_SIZE_POINT
             .if edx == TRUE
                 .if ghost1.afraid == 0 ; se o fantasma matar o pac
                     ;vai para posição de reinício
                     mov pac.playerObj.pos.x, 1120
-                    mov pac.playerObj.pos.y, 350
+                    mov pac.playerObj.pos.y, 350;
 
                     dec pac.life ;perde uma vida
                     .if pac.life == 0 ;se for a última morreu

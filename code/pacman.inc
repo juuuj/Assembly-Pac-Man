@@ -14,8 +14,9 @@ point ends
 
 ;atributos que todo objeto tem, serve como uma classe mãe
 gameObject struct
-    pos      point <>
-    speed    point <>
+    initPos     point<> 
+    pos         point <>
+    speed       point <>
 gameObject ends
 
 ;classe do player
@@ -42,12 +43,12 @@ wall struct
 wall ends
 
 food struct
-    pos         point<>
+    foodObj     gameObject<>
     points      dd 0
 food ends
 
 pill struct
-    pos         point<>
+    pillObj     gameObject<>
     points      dd 0
     time        dd 0
 pill ends
@@ -140,13 +141,13 @@ pill ends
     over byte 0 ;
 
     ;instancia o pac
-    pac player <<<600,500>,  <0,0>>, 0, 4, D_RIGHT, 0, 0> 
+    pac player <<<600,500>, <600,500>,  <0,0>>, 0, 4, D_RIGHT, 0, 0> 
 
     ;instancia os fantasmas
-    ghost1 ghost <<<300,300>,  <0,0>>, 0, 1, D_RIGHT>
-    ghost2 ghost <<<300,400>,  <0,0>>, 0, 1, D_LEFT>
-    ghost3 ghost <<<100,300>,  <0,0>>, 0, 1, D_RIGHT>
-    ghost4 ghost <<<350,400>,  <0,0>>, 0, 1, D_LEFT>
+    ghost1 ghost <<<300,300>, <300,300>,  <0,0>>, 0, 1, D_RIGHT>
+    ghost2 ghost <<<300,400>, <300,400>,  <0,0>>, 0, 1, D_LEFT>
+    ghost3 ghost <<<100,300>, <100,300>,  <0,0>>, 0, 1, D_RIGHT>
+    ghost4 ghost <<<350,400>, <350,400>,  <0,0>>, 0, 1, D_LEFT>
 
     ;instancia as paredes
     ;[nome] wall <<x, y>>
@@ -155,11 +156,11 @@ pill ends
 
     ;instancia as comidas
     ;[nome] food <<x, y>, [pontos]>
-    food1 food <<300, 200>, 10>
+    food1 food <<<300, 200>, <300, 200>, <0,0>>, 10>
 
     ;instancia as pílulas
     ;[nome] pill <<x, y>, [pontos], [tempo(s)]>
-    pill1 pill <<150, 200>, 3000, 5>
+    pill1 pill <<<150, 200>, <150, 200>, <0,0>>, 3000, 5000>
 
     tempPos point <0, 0>
     
