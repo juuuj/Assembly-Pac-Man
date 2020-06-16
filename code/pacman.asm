@@ -94,7 +94,6 @@ loadImages proc
 
     ret
 loadImages endp
-
 ;______________________________________________________________________________
 ;Função para saber se objetos estão colidindo, guarda true ou false no edx
 isColliding proc obj1Pos:point, obj2Pos:point, obj1Size:point, obj2Size:point
@@ -185,7 +184,7 @@ paintLifes proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
 paintLifes endp
 
 ;____________________________________________________________________________
-paintPos proc _hMemDC:HDC, _hMemDC2:HDC, addrPoint:dword, addrPos:dword
+paintPos proc  uses eax _hMemDC:HDC, _hMemDC2:HDC, addrPoint:dword, addrPos:dword
 assume edx:ptr point
 assume ecx:ptr point
 
@@ -302,14 +301,30 @@ paintMap proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
     ;________PAREDES________________________________________________________________
     invoke SelectObject, _hMemDC2, WALL_TILE
 
-    invoke paintPos, _hMemDC, _hMemDC2, addr WALL_SIZE_POINT, addr wall1.pos
-    invoke paintPos, _hMemDC, _hMemDC2, addr WALL_SIZE_POINT, addr wall2.pos
-
+    push eax
+    assume eax:ptr wallTile
+    mov eax, bigWall.first 
+    .while eax != 0
+        invoke paintPos, _hMemDC, _hMemDC2, addr WALL_SIZE_POINT, addr [eax].pos
+        mov eax, [eax].next
+    .endw
+    assume eax:nothing
+    pop eax
 
     ;________COMIDAS_________________________________________________________________
     invoke SelectObject, _hMemDC2, FOOD_IMG
 
     invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food1.foodObj.pos
+    ;push eax
+    ;assume eax:ptr food
+    ;mov eax, allFood.first 
+    ;.while [eax].next != 0
+        ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr [eax].foodObj.pos
+        ;mov eax, [eax].next
+        ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr [eax].foodObj.pos
+    ;.endw
+    ;assume eax:nothing
+    ;pop eax
 
     ;________PÍLULAS_________________________________________________________________
     invoke SelectObject, _hMemDC2, PILL_IMG
@@ -371,11 +386,9 @@ paintThread proc p:DWORD
 paintThread endp
 
 ;_____________________________________________________________________________
-willCollide proc direction:BYTE, addrObj:dword
+willCollide proc uses ebx direction:BYTE, addrObj:dword
 assume eax:ptr gameObject
     mov eax, addrObj
-
-    push ebx
 
     mov ebx, [eax].pos.x
     mov tempPos.x, ebx
@@ -392,16 +405,20 @@ assume eax:ptr gameObject
         add tempPos.y, 4
     .endif
 
-    invoke isColliding, tempPos, wall1.pos, PAC_SIZE_POINT, WALL_SIZE_POINT
-    .if edx == TRUE
-        ret
-    .endif
-    invoke isColliding, tempPos, wall2.pos, PAC_SIZE_POINT, WALL_SIZE_POINT
-    .if edx == TRUE
-        ret
-    .endif
+    push eax
 
-    pop ebx
+    assume eax:ptr wallTile
+    mov eax, bigWall.first 
+    .while eax != 0
+        invoke isColliding, tempPos, [eax].pos, PAC_SIZE_POINT, WALL_SIZE_POINT
+        .if edx == TRUE
+            pop eax
+            ret
+        .endif
+        mov eax, [eax].next
+    .endw
+
+    pop eax
 
 ret
 willCollide endp
@@ -544,7 +561,17 @@ gameOver proc
     invoke restartGhost, addr ghost3
     invoke restartGhost, addr ghost4
 
-    invoke reposition, addr food1.foodObj
+    ;invoke reposition, addr food1.foodObj
+    push eax
+    assume eax:ptr food
+    mov eax, allFood.first
+    .while eax != 0
+        invoke reposition, addr [eax].foodObj
+        mov eax, [eax].next
+    .endw
+    pop eax
+    ;pop eax
+
     invoke reposition, addr pill1.pillObj
 
     mov food_left, 1
@@ -557,7 +584,7 @@ gameOver endp
 
 ;_____________________________________________________________________________
 colideWithWall proc addrWall:dword
-assume eax:ptr wall
+assume eax:ptr wallTile
     mov eax, addrWall
    
     invoke isColliding, pac.playerObj.pos, [eax].pos, PAC_SIZE_POINT, WALL_SIZE_POINT
@@ -671,6 +698,16 @@ gameManager proc p:dword
 
             ;verifica se tocou nas comidas
             invoke colideWithFood, addr food1
+            ;push eax
+            ;assume eax:ptr food
+            
+            ;mov eax, allFood.first
+            ;.while eax != 0
+            ;    invoke colideWithFood, eax
+            ;    mov eax, [eax].next
+            ;.endw
+            ;assume eax:nothing
+            ;pop eax
 
             ;verifica se tocou nas pílulas
             invoke colideWithPill, addr pill1

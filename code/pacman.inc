@@ -14,7 +14,7 @@ point ends
 
 ;atributos que todo objeto tem, serve como uma classe mãe
 gameObject struct
-    initPos     point<> 
+    initPos     point <> 
     pos         point <>
     speed       point <>
 gameObject ends
@@ -38,14 +38,24 @@ ghost struct
 ghost ends                 
 
 ;parede
+wallTile struct
+    pos     point<>
+    next    dd 0
+wallTile ends
+
 wall struct
-    pos         point<>
+    first       dd 0
 wall ends
 
 food struct
     foodObj     gameObject<>
     points      dd 0
+    next        dd 0
 food ends
+
+foods struct
+    first       dd 0
+foods ends
 
 pill struct
     pillObj     gameObject<>
@@ -75,7 +85,7 @@ pill ends
     LIFE_SIZE    EQU 32
 
     ;tem q testar e talvez mudar dps
-    WALL_SIZE EQU 16 
+    WALL_SIZE EQU 20 
     FOOD_SIZE EQU 8
     PILL_SIZE EQU 8
 
@@ -90,13 +100,10 @@ pill ends
     paintstruct        PAINTSTRUCT <>
 
     PAC_SIZE_POINT      point <32,32>
-    PAC_HALF_SIZE_P     point <16,16>
 
     GHOST_SIZE_POINT    point <32,32>
-    GHOST_HALF_SIZE_P   point <16,16>
 
-    WALL_SIZE_POINT     point <16,16>
-    WALL_HALF_SIZE_P    point <8,8>
+    WALL_SIZE_POINT     point <20,20>
 
     FOOD_SIZE_POINT     point <8,8>
     FOOD_HALF_SIZE_P    point <4,4>
@@ -150,19 +157,29 @@ pill ends
     ghost4 ghost <<<350,400>, <350,400>,  <0,0>>, 0, 1, D_LEFT>
 
     ;instancia as paredes
-    ;[nome] wall <<x, y>>
-    wall1 wall  <<600, 400>>
-    wall2 wall  <<500, 200>>
+    ;[nome] wall <<x, y>, OFFSET next>
+    wall1 wallTile  <<600, 400>, 0>
+    wall2 wallTile  <<500, 200>, OFFSET wall1>
+    wall3 wallTile  <<520, 200>, OFFSET wall2>
+    wall4 wallTile  <<100, 100>, OFFSET wall3>
+    wall5 wallTile  <<100, 120>, OFFSET wall4>
+
+    bigWall wall    <OFFSET wall5>
 
     ;instancia as comidas
-    ;[nome] food <<x, y>, [pontos]>
-    food1 food <<<300, 200>, <300, 200>, <0,0>>, 10>
+    ;[nome] food <<x, y>, <x, y>, [pontos], OFFSET next>
+    food1 food <<<300, 200>, <300, 200>, <0,0>>, 10, 0>
+    food2 food <<<400, 500>, <400, 500>, <0,0>>, 10, OFFSET food1>
+    food3 food <<<300, 400>, <300, 400>, <0,0>>, 10, OFFSET food2>
+
+    allFood foods <OFFSET food2>
 
     ;instancia as pílulas
-    ;[nome] pill <<x, y>, [pontos], [tempo(s)]>
+    ;[nome] pill <<x, y>, <x, y>, [pontos], [tempo(ms)]>
     pill1 pill <<<150, 200>, <150, 200>, <0,0>>, 3000, 5000>
 
-    tempPos point <0, 0>
+    tempPos     point       <0, 0>
+    tempWall    wallTile    <<0, 0>, 0>
     
     RIGHTARROW            BYTE 0
     
