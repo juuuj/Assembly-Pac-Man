@@ -33,7 +33,7 @@ CommandLine LPSTR ?
 .CODE
 start: 
 
-    invoke  uFMOD_PlaySong,TEXT_("Speedball.xm"),0,XM_FILE
+    ;invoke  uFMOD_PlaySong,TEXT_("Speedball.xm"),0,XM_FILE
     ;invoke  uFMOD_PlaySong,0,0,0   comando para parar a musica 
     invoke GetModuleHandle, NULL             
                                             
@@ -433,58 +433,36 @@ assume eax:ptr gameObject
 
 ret
 willCollide endp
-;______________________________________________________________________________
-;função para o personagem se mover, baseado na velocidade
-movePlayer proc uses eax
-
-    invoke willCollide, pac.direction, addr pac.playerObj
-    .if edx == FALSE
-        mov eax, pac.playerObj.pos.x
-        mov ebx, pac.playerObj.speed.x
-        .if bx > 7fh
-            or bx, 65280
-        .endif
-        add eax, ebx
-        mov pac.playerObj.pos.x, eax
-        mov eax, pac.playerObj.pos.y
-        mov ebx, pac.playerObj.speed.y
-        .if bx > 7fh 
-            or bx, 65280
-        .endif
-        add ax, bx
-        mov pac.playerObj.pos.y, eax
-    .endif
-    ret
-movePlayer endp
 
 ;______________________________________________________________________________
-
-updateGhostDirection proc addrGhost:dword 
+randomizeGhost proc uses eax addrGhost:dword 
 assume eax:ptr ghost
     mov eax, addrGhost
 
-    mov ebx, [eax].ghostObj.speed.x ;ebx é a velocidade horizontal
-    mov edx, [eax].ghostObj.speed.y ;edx é a velocidade vertical
-
-    .if ebx != 0 || edx != 0
-        .if ebx == 0 ;se o horizontal for 0, vai pra cima ou pra baixo verificando o edx
-            .if edx > 7fh ;se for negativo, vai pra cima
-                mov [eax].direction, D_TOP       
-            .else ;se positivo, vai pra baixo
-                mov [eax].direction, D_DOWN     
-            .endif 
-        .elseif ebx > 7fh ;se a velocidade horizontal for negativa, vai pra esquerda
-            mov [eax].direction, D_LEFT 
-        .else ;se não, vai pra direita
-            mov [eax].direction, D_RIGHT  
-        .endif
+    .if [eax].random_dir < 3
+        add [eax].random_dir, 1
+    .elseif [eax].random_dir == 3
+        mov [eax].random_dir, 0
     .endif
+
+    ret
+randomizeGhost endp
+;______________________________________________________________________________
+
+updateGhostDirection proc uses eax ebx addrGhost:dword 
+assume eax:ptr ghost
+    mov eax, addrGhost
+
+    mov bh, [eax].random_dir
+    ;mov bh, D_RIGHT
+    mov [eax].direction, bh
+    
     ret
 updateGhostDirection endp
 
 ;______________________________________________________________________________
 ;move o fantasma baseado na sua direção
-moveGhost proc uses eax addrGhost:dword
+moveGhost proc uses eax ebx ecx addrGhost:dword
     assume eax:ptr ghost
     mov eax, addrGhost
 
@@ -502,10 +480,15 @@ moveGhost proc uses eax addrGhost:dword
         .elseif [eax].direction == D_LEFT
             add [eax].ghostObj.pos.x,  -GHOST_SPEED
         .endif
+    .else
+        invoke updateGhostDirection, eax
     .endif
+    invoke randomizeGhost, eax
+
     assume eax:nothing
     ret
 moveGhost endp
+
 ;______________________________________________________________________________
 ;função para um objeto n sair da tela, mas sim voltar pelo outro lado
 fixCoordinates proc addrObj:dword
@@ -530,6 +513,54 @@ assume eax:ptr gameObject
 assume eax:nothing
 ret
 fixCoordinates endp
+;______________________________________________________________________________
+;função para o personagem se mover, baseado na velocidade
+movePlayer proc uses eax
+
+    invoke willCollide, pac.direction, addr pac.playerObj
+    .if edx == FALSE
+        mov eax, pac.playerObj.pos.x
+        mov ebx, pac.playerObj.speed.x
+        .if bx > 7fh
+            or bx, 65280
+        .endif
+        add eax, ebx
+        mov pac.playerObj.pos.x, eax
+        mov eax, pac.playerObj.pos.y
+        mov ebx, pac.playerObj.speed.y
+        .if bx > 7fh 
+            or bx, 65280
+        .endif
+        add ax, bx
+        mov pac.playerObj.pos.y, eax
+        invoke fixCoordinates, addr pac.playerObj
+    .endif
+    ret
+movePlayer endp
+
+;______________________________________________________________________________
+;função pra mover todos os fantasmas de uma vez e deixar o código do gameManager mais limpo
+moveGhosts proc
+
+    .if ghost1.alive
+        invoke moveGhost, addr ghost1
+        invoke fixCoordinates, addr ghost1.ghostObj
+    .endif
+    .if ghost2.alive
+        invoke moveGhost, addr ghost2
+        invoke fixCoordinates, addr ghost2.ghostObj
+    .endif
+    .if ghost3.alive
+        invoke moveGhost, addr ghost3
+        invoke fixCoordinates, addr ghost3.ghostObj
+    .endif
+    .if ghost4.alive
+        invoke moveGhost, addr ghost4
+        invoke fixCoordinates, addr ghost4.ghostObj
+    .endif
+
+ret
+moveGhosts endp
 
 ;______________________________________________________________________________
 reposition proc uses eax ebx addrObj:dword
@@ -725,17 +756,7 @@ gameManager proc p:dword
 
             ;move o player e os fantasmas
             invoke movePlayer
-            invoke moveGhost, addr ghost1
-            invoke moveGhost, addr ghost2
-            invoke moveGhost, addr ghost3
-            invoke moveGhost, addr ghost4
-            
-            ;volta o player e os fantasmas se eles tiverem passado do limite
-            invoke fixCoordinates, addr pac.playerObj
-            invoke fixCoordinates, addr ghost1.ghostObj
-            invoke fixCoordinates, addr ghost2.ghostObj
-            invoke fixCoordinates, addr ghost3.ghostObj
-            invoke fixCoordinates, addr ghost4.ghostObj
+            invoke moveGhosts
 
         .endw 
     
