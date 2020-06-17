@@ -13,6 +13,15 @@ include pacman.inc
 
 WinMain proto :DWORD,:DWORD,:DWORD,:DWORD
 
+
+TEXT_ MACRO your_text:VARARG
+    LOCAL text_string
+    .data
+     text_string db your_text,0
+    .code
+    EXITM <addr text_string>
+ENDM
+
 .DATA
 ClassName db "PacmanWindowClass",0 
 AppName db "PACMAN",0         
@@ -24,6 +33,8 @@ CommandLine LPSTR ?
 .CODE
 start: 
 
+    invoke  uFMOD_PlaySong,TEXT_("Speedball.xm"),0,XM_FILE
+    ;invoke  uFMOD_PlaySong,0,0,0   comando para parar a musica 
     invoke GetModuleHandle, NULL             
                                             
     mov hInstance,eax 

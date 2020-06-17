@@ -1,3 +1,8 @@
+
+include \masm32\include\winmm.inc
+includelib \masm32\lib\winmm.lib
+include ufmod.inc
+includelib ufmod.lib
 include \masm32\include\masm32rt.inc
 include \masm32\include\msimg32.inc
 
