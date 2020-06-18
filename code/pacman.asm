@@ -138,7 +138,6 @@ isColliding proc obj1Pos:point, obj2Pos:point, obj1Size:point, obj2Size:point
     ret
 
 isColliding endp
-
 ;______________________________________________________________________________
 ;decide o background dependendo do gamestate
 paintBackground proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
@@ -173,7 +172,6 @@ paintBackground proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
 
     ret
 paintBackground endp
-
 ;____________________________________________________________________________
 ;pinta a quantidade de vidas na tela
 paintLifes proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
@@ -190,11 +188,10 @@ paintLifes proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
         pop ecx
         inc ebx
     .endw
-
     ret
 paintLifes endp
-
 ;____________________________________________________________________________
+;pinta um objeto qualquer baseado na posição e tamanho dele
 paintPos proc  uses eax _hMemDC:HDC, _hMemDC2:HDC, addrPoint:dword, addrPos:dword
 assume edx:ptr point
 assume ecx:ptr point
@@ -209,6 +206,7 @@ assume ecx:ptr point
 ret
 paintPos endp
 ;____________________________________________________________________________
+;decide o sprite do pacman baseado na direção e vai mudando a boca de aberta para fechada e passa pro edx
 decideAnimation proc
 
     .if pac.animation == 0
@@ -250,11 +248,9 @@ decideAnimation endp
 ;desenha o pac na tela
 paintPlayer proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
 
-    invoke decideAnimation
-
-    invoke SelectObject, _hMemDC2, edx
-
-    invoke paintPos, _hMemDC, _hMemDC2, addr PAC_SIZE_POINT, addr pac.playerObj.pos
+    invoke decideAnimation ;decide a animação, passa pro edx
+    invoke SelectObject, _hMemDC2, edx ;seleciona essa imagem para pintar
+    invoke paintPos, _hMemDC, _hMemDC2, addr PAC_SIZE_POINT, addr pac.playerObj.pos ;pinta
 
     ret
 paintPlayer endp
@@ -269,42 +265,34 @@ paintGhosts proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
     .else
         invoke SelectObject, _hMemDC2, G1
     .endif
-
     invoke paintPos, _hMemDC, _hMemDC2, addr GHOST_SIZE_POINT, addr ghost1.ghostObj.pos
 
 ;Fantasma 2:
-
     .if ghost2.afraid == 1 
         invoke SelectObject, _hMemDC2, G0
     .else
         invoke SelectObject, _hMemDC2, G2
     .endif
-
     invoke paintPos, _hMemDC, _hMemDC2, addr GHOST_SIZE_POINT, addr ghost2.ghostObj.pos
 
 ;Fantasma 3:
-
     .if ghost3.afraid == 1 
         invoke SelectObject, _hMemDC2, G0
     .else
         invoke SelectObject, _hMemDC2, G3
     .endif
-
     invoke paintPos, _hMemDC, _hMemDC2, addr GHOST_SIZE_POINT, addr ghost3.ghostObj.pos
 
 ;Fantasma 4:
-
     .if ghost4.afraid == 1 
         invoke SelectObject, _hMemDC2, G0
     .else
         invoke SelectObject, _hMemDC2, G4
     .endif
-
     invoke paintPos, _hMemDC, _hMemDC2, addr GHOST_SIZE_POINT, addr ghost4.ghostObj.pos
 
     ret
 paintGhosts endp
-
 ;________________________________________________________________________________
 ;desenha os objetos do mapa (paredes, comida, pílulas)
 paintMap proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
@@ -396,7 +384,9 @@ paintThread proc p:DWORD
     ret
 paintThread endp
 
-;_____________________________________________________________________________
+;_______________________________________________________________________________
+;verifica se um objeto vai colidir com outro, antes da colisão ocorrer
+;isso é necessário para o pacman e os fantasmas não ficarem presos na parede
 willCollide proc uses ebx direction:BYTE, addrObj:dword
 assume eax:ptr gameObject
     mov eax, addrObj
@@ -407,13 +397,13 @@ assume eax:ptr gameObject
     mov tempPos.y, ebx
 
     .if direction == 0 ;right
-        add tempPos.x, 4
+        add tempPos.x, 6
     .elseif direction == 1 ;top
-        add tempPos.y, -4
+        add tempPos.y, -6
     .elseif direction == 2 ;left
-        add tempPos.x, -4
+        add tempPos.x, -6
     .elseif direction == 3 ;down
-        add tempPos.y, 4
+        add tempPos.y, 6
     .endif
 
     push eax
@@ -435,6 +425,7 @@ ret
 willCollide endp
 
 ;______________________________________________________________________________
+;roda a variável de "próxima direção" de cada fantasma
 randomizeGhost proc uses eax addrGhost:dword 
 assume eax:ptr ghost
     mov eax, addrGhost
@@ -448,18 +439,6 @@ assume eax:ptr ghost
     ret
 randomizeGhost endp
 ;______________________________________________________________________________
-
-updateGhostDirection proc uses eax ebx addrGhost:dword 
-assume eax:ptr ghost
-    mov eax, addrGhost
-
-    mov bh, [eax].random_dir
-    ;mov bh, D_RIGHT
-    mov [eax].direction, bh
-    
-    ret
-updateGhostDirection endp
-;______________________________________________________________________________
 ;função para um objeto n sair da tela, mas sim voltar pelo outro lado
 fixCoordinates proc addrObj:dword
 assume eax:ptr gameObject
@@ -468,15 +447,12 @@ assume eax:ptr gameObject
     .if [eax].pos.x > WINDOW_SIZE_X && [eax].pos.x < 80000000h
         mov [eax].pos.x, 20
     .endif
-
     .if [eax].pos.x <= 10 || [eax].pos.x > 80000000h
         mov [eax].pos.x, WINDOW_SIZE_X - 20 
     .endif
-
-    .if [eax].pos.y > WINDOW_SIZE_Y - 70 && [eax].pos.y < 80000000h
+    .if [eax].pos.y > WINDOW_SIZE_Y - 30 && [eax].pos.y < 80000000h
         mov [eax].pos.y, 20
     .endif
-
     .if [eax].pos.y <= 10 || [eax].pos.y > 80000000h
         mov [eax].pos.y, WINDOW_SIZE_Y - 80 
     .endif
@@ -503,8 +479,9 @@ moveGhost proc uses eax ebx ecx addrGhost:dword
         .elseif [eax].direction == D_LEFT
             add [eax].ghostObj.pos.x,  -GHOST_SPEED
         .endif
-    .else
-        invoke updateGhostDirection, eax
+    .else ;se o fantasma for colidir, muda a direção dele para a aleatória pré selecionada
+        mov bh, [eax].random_dir
+        mov [eax].direction, bh
     .endif
     invoke fixCoordinates, addr [eax].ghostObj
     invoke randomizeGhost, eax
@@ -512,7 +489,6 @@ moveGhost proc uses eax ebx ecx addrGhost:dword
     assume eax:nothing
     ret
 moveGhost endp
-
 ;______________________________________________________________________________
 ;função para o personagem se mover, baseado na velocidade
 movePlayer proc uses eax
@@ -538,6 +514,7 @@ movePlayer proc uses eax
     ret
 movePlayer endp
 ;______________________________________________________________________________
+;faz verificações no fantasma para decrescer o timer de medo e morte, e voltar ao normal se o timer acabar
 checkGhost proc uses eax addrGhost:dword
 assume eax:ptr ghost
     mov eax, addrGhost
@@ -581,6 +558,7 @@ ret
 moveGhosts endp
 
 ;______________________________________________________________________________
+;reposiciona um objeto qualquer
 reposition proc uses eax ebx addrObj:dword
 assume ecx:ptr  gameObject
     mov ecx, addrObj
@@ -597,13 +575,13 @@ assume ecx:ptr  gameObject
 ret
 reposition endp
 ;______________________________________________________________________________
+;reinicia todas as variáveis de um fantasma para o inicial
 restartGhost proc addrGhost:dword
 assume eax: ptr ghost
     mov eax, addrGhost
     
     mov [eax].afraid, FALSE
     mov [eax].afraid_timer, 0
-    ;mov [eax].alive, TRUE
     mov [eax].direction, D_RIGHT
     invoke reposition, addr [eax].ghostObj
 
@@ -631,33 +609,16 @@ gameOver proc
         mov eax, [eax].next
     .endw
     pop eax
-    ;pop eax
 
     invoke reposition, addr pill1.pillObj
 
     mov food_left, 1
     mov score, 0
 
-    invoke updateScreen
-
     ret
 gameOver endp
-
 ;_____________________________________________________________________________
-colideWithWall proc addrWall:dword
-assume eax:ptr wallTile
-    mov eax, addrWall
-   
-    invoke isColliding, pac.playerObj.pos, [eax].pos, PAC_SIZE_POINT, WALL_SIZE_POINT
-        .if edx == TRUE
-            mov pac.playerObj.speed.x, 0
-            mov pac.playerObj.speed.y, 0
-        .endif
-assume eax:nothing
-ret
-colideWithWall endp
-
-;_____________________________________________________________________________
+;verifica se o pac bateu em um fantasma e faz ele matar ou perder uma vida, dependendo da situação
 hitGhost proc addrGhost:dword
 assume ecx:ptr ghost
 
@@ -685,8 +646,8 @@ assume ecx:ptr ghost
 
 ret
 hitGhost endp
-
 ;_____________________________________________________________________________
+;verifica se o pac comeu uma comida e ganha o jogo se for a última
 colideWithFood proc addrFood:dword
 assume eax:ptr food
     mov eax, addrFood
@@ -706,6 +667,7 @@ assume eax:ptr food
 ret
 colideWithFood endp
 ;_____________________________________________________________________________
+;deixa todos os fantasmas assustados
 scareGhosts proc
 
     mov ghost1.afraid, TRUE
@@ -720,6 +682,7 @@ scareGhosts proc
 ret
 scareGhosts endp
 ;_____________________________________________________________________________
+;verifica se o pac pegou uma pílula, e se for o caso chama o scareGhosts
 colideWithPill proc addrPill:dword
 assume eax:ptr pill
     mov eax, addrPill
@@ -729,21 +692,11 @@ assume eax:ptr pill
             mov [eax].pillObj.pos.x, -100
             mov [eax].pillObj.pos.y, -100
             add score, 30 ;ganha pontos
-            ;mov ghost1.afraid, 1
-            ;mov ghost2.afraid, 1
-            ;mov ghost3.afraid, 1
-            ;mov ghost4.afraid, 1
-            ;espera para eles voltarem ao normal
-            ;invoke Sleep, pill1.time
-            ;mov ghost1.afraid, 0
-            ;mov ghost2.afraid, 0
-            ;mov ghost3.afraid, 0
             invoke scareGhosts
         .endif
 
 ret
 colideWithPill endp
-
 ;______________________________________________________________________________
 ;função principal para o jogo agir de acordo com o gamestate
 gameManager proc p:dword
@@ -800,9 +753,8 @@ ret
 gameManager endp
 
 ;_____________________________________________________________________________________________________________________________
-
 ;muda a velocidade do pac dependendo da tecla q foi apertada
-changePlayerSpeed proc direction : BYTE
+changePlayerSpeed proc direction:BYTE
 
     .if direction == D_TOP ; w / seta pra cima
         mov pac.playerObj.speed.y, -PAC_SPEED
