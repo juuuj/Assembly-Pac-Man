@@ -30,16 +30,18 @@ player struct
     life                BYTE 4
     direction           BYTE 0
     animation           BYTE 0
-    anim_counter        dd 0
+    anim_counter        dd   0
 player ends
 
 ;fantasma
 ghost struct
     ghostObj          gameObject <>
     afraid            BYTE  0
+    afraid_timer      dd    0
     alive             BYTE  1
-    direction         BYTE  0   
-    random_dir        BYTE  0 
+    death_timer       dd    0
+    direction         BYTE  0
+    random_dir        BYTE  0
 ghost ends                 
 
 ;parede
@@ -156,10 +158,10 @@ pill ends
     pac player <<<600,500>, <600,500>,  <0,0>>, 4, D_RIGHT, 0, 0> 
 
     ;instancia os fantasmas
-    ghost1 ghost <<<300,300>, <300,300>,  <0,0>>, FALSE, TRUE, D_RIGHT, 1>
-    ghost2 ghost <<<300,400>, <300,400>,  <0,0>>, FALSE, TRUE, D_LEFT,  2>
-    ghost3 ghost <<<100,300>, <100,300>,  <0,0>>, FALSE, TRUE, D_RIGHT, 3>
-    ghost4 ghost <<<350,400>, <350,400>,  <0,0>>, FALSE, TRUE, D_LEFT,  0>
+    ghost1 ghost <<<300,300>, <300,300>,  <0,0>>, FALSE, 0, TRUE, 0, D_RIGHT, 1>
+    ghost2 ghost <<<300,400>, <300,400>,  <0,0>>, FALSE, 0, TRUE, 0, D_LEFT,  2>
+    ghost3 ghost <<<100,300>, <100,300>,  <0,0>>, FALSE, 0, TRUE, 0, D_RIGHT, 3>
+    ghost4 ghost <<<350,400>, <350,400>,  <0,0>>, FALSE, 0, TRUE, 0, D_LEFT,  0>
 
     ;instancia as paredes
     ;[nome] wall <<x, y>, OFFSET next>
@@ -168,7 +170,7 @@ pill ends
     wall3 wallTile  <<520, 200>, OFFSET wall2>
     wall4 wallTile  <<100, 100>, OFFSET wall3>
     wall5 wallTile  <<100, 120>, OFFSET wall4>
-    wall6 wallTile  <<580, 140>, OFFSET wall5>
+    wall6 wallTile  <<600, 140>, OFFSET wall5>
 
     bigWall wall    <OFFSET wall6>
 

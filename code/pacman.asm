@@ -459,36 +459,6 @@ assume eax:ptr ghost
     
     ret
 updateGhostDirection endp
-
-;______________________________________________________________________________
-;move o fantasma baseado na sua direção
-moveGhost proc uses eax ebx ecx addrGhost:dword
-    assume eax:ptr ghost
-    mov eax, addrGhost
-
-    mov ebx, [eax].ghostObj.speed.x
-    mov ecx, [eax].ghostObj.speed.y
-
-    invoke willCollide, [eax].direction, addr [eax].ghostObj
-    .if edx == FALSE
-        .if [eax].direction == D_TOP
-            add [eax].ghostObj.pos.y, -GHOST_SPEED
-        .elseif [eax].direction == D_RIGHT
-            add [eax].ghostObj.pos.x,  GHOST_SPEED
-        .elseif [eax].direction == D_DOWN
-            add [eax].ghostObj.pos.y,  GHOST_SPEED
-        .elseif [eax].direction == D_LEFT
-            add [eax].ghostObj.pos.x,  -GHOST_SPEED
-        .endif
-    .else
-        invoke updateGhostDirection, eax
-    .endif
-    invoke randomizeGhost, eax
-
-    assume eax:nothing
-    ret
-moveGhost endp
-
 ;______________________________________________________________________________
 ;função para um objeto n sair da tela, mas sim voltar pelo outro lado
 fixCoordinates proc addrObj:dword
@@ -514,6 +484,36 @@ assume eax:nothing
 ret
 fixCoordinates endp
 ;______________________________________________________________________________
+;move o fantasma baseado na sua direção
+moveGhost proc uses eax ebx ecx addrGhost:dword
+    assume eax:ptr ghost
+    mov eax, addrGhost
+
+    mov ebx, [eax].ghostObj.speed.x
+    mov ecx, [eax].ghostObj.speed.y
+
+    invoke willCollide, [eax].direction, addr [eax].ghostObj
+    .if edx == FALSE
+        .if [eax].direction == D_TOP
+            add [eax].ghostObj.pos.y, -GHOST_SPEED
+        .elseif [eax].direction == D_RIGHT
+            add [eax].ghostObj.pos.x,  GHOST_SPEED
+        .elseif [eax].direction == D_DOWN
+            add [eax].ghostObj.pos.y,  GHOST_SPEED
+        .elseif [eax].direction == D_LEFT
+            add [eax].ghostObj.pos.x,  -GHOST_SPEED
+        .endif
+    .else
+        invoke updateGhostDirection, eax
+    .endif
+    invoke fixCoordinates, addr [eax].ghostObj
+    invoke randomizeGhost, eax
+
+    assume eax:nothing
+    ret
+moveGhost endp
+
+;______________________________________________________________________________
 ;função para o personagem se mover, baseado na velocidade
 movePlayer proc uses eax
 
@@ -537,27 +537,45 @@ movePlayer proc uses eax
     .endif
     ret
 movePlayer endp
+;______________________________________________________________________________
+checkGhost proc uses eax addrGhost:dword
+assume eax:ptr ghost
+    mov eax, addrGhost
 
+    .if [eax].afraid_timer > 0
+        add [eax].afraid_timer, -1
+    .elseif [eax].afraid == TRUE
+        mov [eax].afraid, FALSE
+    .endif
+
+    .if [eax].death_timer > 0
+        add [eax].afraid_timer, -1
+    .elseif [eax].alive == FALSE
+        mov [eax].alive, TRUE
+    .endif
+
+ret
+checkGhost endp
 ;______________________________________________________________________________
 ;função pra mover todos os fantasmas de uma vez e deixar o código do gameManager mais limpo
 moveGhosts proc
 
     .if ghost1.alive
         invoke moveGhost, addr ghost1
-        invoke fixCoordinates, addr ghost1.ghostObj
     .endif
     .if ghost2.alive
         invoke moveGhost, addr ghost2
-        invoke fixCoordinates, addr ghost2.ghostObj
     .endif
     .if ghost3.alive
         invoke moveGhost, addr ghost3
-        invoke fixCoordinates, addr ghost3.ghostObj
     .endif
     .if ghost4.alive
         invoke moveGhost, addr ghost4
-        invoke fixCoordinates, addr ghost4.ghostObj
     .endif
+    invoke checkGhost, addr ghost1
+    invoke checkGhost, addr ghost2
+    invoke checkGhost, addr ghost3
+    invoke checkGhost, addr ghost4
 
 ret
 moveGhosts endp
@@ -583,8 +601,9 @@ restartGhost proc addrGhost:dword
 assume eax: ptr ghost
     mov eax, addrGhost
     
-    mov [eax].afraid, 0
-    mov [eax].alive, 1
+    mov [eax].afraid, FALSE
+    mov [eax].afraid_timer, 0
+    ;mov [eax].alive, TRUE
     mov [eax].direction, D_RIGHT
     invoke reposition, addr [eax].ghostObj
 
@@ -654,12 +673,12 @@ assume ecx:ptr ghost
             .if pac.life == 0 ;se for a última morreu
                 invoke gameOver
                 mov GAMESTATE, 3 ;perdeu
-                ;.continue
                 ret
             .endif
-            
         .else ;se o pacman estiver buffado e conseguir matar
-            ;reinicia o fantasma pro meio
+            ;reinicia o fantasma pro meio, parado por um tempo
+            mov [ecx].death_timer, 100
+            mov [ecx].alive, FALSE
             invoke restartGhost, addr [ecx]
         .endif
     .endif
@@ -686,7 +705,20 @@ assume eax:ptr food
 
 ret
 colideWithFood endp
+;_____________________________________________________________________________
+scareGhosts proc
 
+    mov ghost1.afraid, TRUE
+    mov ghost1.afraid_timer, 100
+    mov ghost2.afraid, TRUE
+    mov ghost2.afraid_timer, 100
+    mov ghost3.afraid, TRUE
+    mov ghost3.afraid_timer, 100
+    mov ghost4.afraid, TRUE
+    mov ghost4.afraid_timer, 100
+
+ret
+scareGhosts endp
 ;_____________________________________________________________________________
 colideWithPill proc addrPill:dword
 assume eax:ptr pill
@@ -697,18 +729,16 @@ assume eax:ptr pill
             mov [eax].pillObj.pos.x, -100
             mov [eax].pillObj.pos.y, -100
             add score, 30 ;ganha pontos
-            mov ghost1.afraid, 1
-            mov ghost2.afraid, 1
-            mov ghost3.afraid, 1
-            mov ghost4.afraid, 1
-            invoke updateScreen
+            ;mov ghost1.afraid, 1
+            ;mov ghost2.afraid, 1
+            ;mov ghost3.afraid, 1
+            ;mov ghost4.afraid, 1
             ;espera para eles voltarem ao normal
-            invoke Sleep, pill1.time
-            mov ghost1.afraid, 0
-            mov ghost2.afraid, 0
-            mov ghost3.afraid, 0
-            mov ghost4.afraid, 0
-            invoke updateScreen
+            ;invoke Sleep, pill1.time
+            ;mov ghost1.afraid, 0
+            ;mov ghost2.afraid, 0
+            ;mov ghost3.afraid, 0
+            invoke scareGhosts
         .endif
 
 ret
