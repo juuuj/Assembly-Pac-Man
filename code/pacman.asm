@@ -61,6 +61,14 @@ loadImages proc
     mov G3, eax
     invoke LoadBitmap, hInstance, 104
     mov G4, eax
+    invoke LoadBitmap, hInstance, 131
+    mov G1_DEAD, eax
+    invoke LoadBitmap, hInstance, 132
+    mov G2_DEAD, eax
+    invoke LoadBitmap, hInstance, 133
+    mov G3_DEAD, eax
+    invoke LoadBitmap, hInstance, 134
+    mov G4_DEAD, eax
 
     ;Carregando as imagens do pac:
     invoke LoadBitmap, hInstance, 115
@@ -260,7 +268,9 @@ paintPlayer endp
 paintGhosts proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
 
     ;Fantasma 1:
-    .if ghost1.afraid == 1 
+    .if ghost1.alive == FALSE
+        invoke SelectObject, _hMemDC2, G1_DEAD
+    .elseif ghost1.afraid == 1 
         invoke SelectObject, _hMemDC2, G0
     .else
         invoke SelectObject, _hMemDC2, G1
@@ -268,7 +278,9 @@ paintGhosts proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
     invoke paintPos, _hMemDC, _hMemDC2, addr GHOST_SIZE_POINT, addr ghost1.ghostObj.pos
 
 ;Fantasma 2:
-    .if ghost2.afraid == 1 
+    .if ghost2.alive == FALSE
+        invoke SelectObject, _hMemDC2, G2_DEAD
+    .elseif ghost2.afraid == 1 
         invoke SelectObject, _hMemDC2, G0
     .else
         invoke SelectObject, _hMemDC2, G2
@@ -276,7 +288,9 @@ paintGhosts proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
     invoke paintPos, _hMemDC, _hMemDC2, addr GHOST_SIZE_POINT, addr ghost2.ghostObj.pos
 
 ;Fantasma 3:
-    .if ghost3.afraid == 1 
+    .if ghost3.alive == FALSE
+        invoke SelectObject, _hMemDC2, G3_DEAD
+    .elseif ghost3.afraid == 1 
         invoke SelectObject, _hMemDC2, G0
     .else
         invoke SelectObject, _hMemDC2, G3
@@ -284,7 +298,9 @@ paintGhosts proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
     invoke paintPos, _hMemDC, _hMemDC2, addr GHOST_SIZE_POINT, addr ghost3.ghostObj.pos
 
 ;Fantasma 4:
-    .if ghost4.afraid == 1 
+    .if ghost4.alive == FALSE
+        invoke SelectObject, _hMemDC2, G4_DEAD
+    .elseif ghost4.afraid == 1 
         invoke SelectObject, _hMemDC2, G0
     .else
         invoke SelectObject, _hMemDC2, G4
@@ -302,10 +318,10 @@ paintMap proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
 
     push eax
     assume eax:ptr wallTile
-    mov eax, bigWall.first 
+    mov eax, map.first_wall 
     .while eax != 0
         invoke paintPos, _hMemDC, _hMemDC2, addr WALL_SIZE_POINT, addr [eax].pos
-        mov eax, [eax].next
+        mov eax, [eax].next_wall
     .endw
     assume eax:nothing
     pop eax
@@ -314,10 +330,35 @@ paintMap proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
     invoke SelectObject, _hMemDC2, FOOD_IMG
 
     invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food1.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food2.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food3.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food4.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food5.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food6.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food7.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food8.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food9.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food10.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food11.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food12.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food13.foodObj.pos
+    ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food14.foodObj.pos
+    ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food15.foodObj.pos
+    ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food16.foodObj.pos
+    ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food17.foodObj.pos
+    ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food18.foodObj.pos
+    ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food19.foodObj.pos
+    ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food20.foodObj.pos
+    ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food21.foodObj.pos
+    ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food22.foodObj.pos
+    ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food23.foodObj.pos
+    ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food24.foodObj.pos
+    ;aqui
+
     ;push eax
     ;assume eax:ptr food
-    ;mov eax, allFood.first 
-    ;.while [eax].next != 0
+    ;mov eax, map.first_food
+    ;.while [eax].next_food != 0
         ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr [eax].foodObj.pos
         ;mov eax, [eax].next
         ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr [eax].foodObj.pos
@@ -329,6 +370,18 @@ paintMap proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
     invoke SelectObject, _hMemDC2, PILL_IMG
 
     invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr pill1.pillObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr pill2.pillObj.pos
+    ;aqui
+
+    ;push eax
+    ;assume eax:ptr pill
+    ;mov eax, map.first_pill 
+    ;.while eax != 0
+        ;invoke paintPos, _hMemDC, _hMemDC2, addr WALL_SIZE_POINT, addr [eax].pillObj.pos
+        ;mov eax, [eax].next_pill
+    ;.endw
+    ;assume eax:nothing
+    ;pop eax
 
     ret
 paintMap endp
@@ -355,10 +408,10 @@ updateScreen proc
     invoke paintBackground, hDC, hMemDC, hMemDC2 ;verifica se é necessário mudar o background
 
     .if GAMESTATE == 2 ;se o gamestate for o do jogo, desenha os objetos
+        invoke paintMap, hDC, hMemDC, hMemDC2
         invoke paintPlayer, hDC, hMemDC, hMemDC2
         invoke paintGhosts, hDC, hMemDC, hMemDC2
         invoke paintLifes, hDC, hMemDC, hMemDC2
-        invoke paintMap, hDC, hMemDC, hMemDC2
     .endif
 
     invoke BitBlt, hDC, 0, 0, WINDOW_SIZE_X, WINDOW_SIZE_Y, hMemDC, 0, 0, SRCCOPY
@@ -409,14 +462,14 @@ assume eax:ptr gameObject
     push eax
 
     assume eax:ptr wallTile
-    mov eax, bigWall.first 
+    mov eax, map.first_wall 
     .while eax != 0
         invoke isColliding, tempPos, [eax].pos, PAC_SIZE_POINT, WALL_SIZE_POINT
         .if edx == TRUE
             pop eax
             ret
         .endif
-        mov eax, [eax].next
+        mov eax, [eax].next_wall
     .endw
 
     pop eax
@@ -526,7 +579,7 @@ assume eax:ptr ghost
     .endif
 
     .if [eax].death_timer > 0
-        add [eax].afraid_timer, -1
+        add [eax].death_timer, -1
     .elseif [eax].alive == FALSE
         mov [eax].alive, TRUE
     .endif
@@ -576,13 +629,14 @@ ret
 reposition endp
 ;______________________________________________________________________________
 ;reinicia todas as variáveis de um fantasma para o inicial
-restartGhost proc addrGhost:dword
+restartGhost proc uses eax ebx addrGhost:dword
 assume eax: ptr ghost
     mov eax, addrGhost
     
     mov [eax].afraid, FALSE
     mov [eax].afraid_timer, 0
-    mov [eax].direction, D_RIGHT
+    mov bh, [eax].init_dir
+    mov [eax].direction, bh
     invoke reposition, addr [eax].ghostObj
 
 ret
@@ -600,20 +654,62 @@ gameOver proc
     invoke restartGhost, addr ghost3
     invoke restartGhost, addr ghost4
 
-    ;invoke reposition, addr food1.foodObj
-    push eax
-    assume eax:ptr food
-    mov eax, allFood.first
-    .while eax != 0
-        invoke reposition, addr [eax].foodObj
-        mov eax, [eax].next
-    .endw
-    pop eax
+    invoke reposition, addr food1.foodObj
+    invoke reposition, addr food2.foodObj
+    invoke reposition, addr food3.foodObj
+    invoke reposition, addr food4.foodObj
+    invoke reposition, addr food5.foodObj
+    invoke reposition, addr food6.foodObj
+    invoke reposition, addr food7.foodObj
+    invoke reposition, addr food8.foodObj
+    invoke reposition, addr food9.foodObj
+    invoke reposition, addr food10.foodObj
+    invoke reposition, addr food11.foodObj
+    invoke reposition, addr food12.foodObj
+    invoke reposition, addr food13.foodObj
+    ;invoke reposition, addr food14.foodObj
+    ;invoke reposition, addr food15.foodObj
+    ;invoke reposition, addr food16.foodObj
+    ;invoke reposition, addr food17.foodObj
+    ;invoke reposition, addr food18.foodObj
+    ;invoke reposition, addr food19.foodObj
+    ;invoke reposition, addr food21.foodObj
+    ;invoke reposition, addr food22.foodObj
+    ;invoke reposition, addr food23.foodObj
+    ;invoke reposition, addr food24.foodObj
+    ;invoke reposition, addr food25.foodObj
+    ;invoke reposition, addr food26.foodObj
+    ;invoke reposition, addr food27.foodObj
+    ;invoke reposition, addr food28.foodObj
+    ;invoke reposition, addr food29.foodObj
+    ;invoke reposition, addr food30.foodObj
+    ;invoke reposition, addr food31.foodObj
+    ;invoke reposition, addr food32.foodObj
+    ;invoke reposition, addr food33.foodObj
+    ;invoke reposition, addr food34.foodObj
+    ;invoke reposition, addr food35.foodObj
+    ;invoke reposition, addr food36.foodObj
+    ;invoke reposition, addr food37.foodObj
+    ;invoke reposition, addr food38.foodObj
+    ;invoke reposition, addr food39.foodObj
+    ;invoke reposition, addr food40.foodObj
+
+    ;aqui
+
+    ;push eax
+    ;assume eax:ptr food
+    ;mov eax, allFood.first
+    ;.while eax != 0
+    ;    invoke reposition, addr [eax].foodObj
+    ;    mov eax, [eax].next
+    ;.endw
+    ;pop eax
 
     invoke reposition, addr pill1.pillObj
+    invoke reposition, addr pill2.pillObj
+    ;aqui
 
-    mov food_left, 1
-    mov score, 0
+    mov food_left, 13
 
     ret
 gameOver endp
@@ -656,7 +752,6 @@ assume eax:ptr food
         .if edx == TRUE
             mov [eax].foodObj.pos.x, -100
             mov [eax].foodObj.pos.y, -100
-            add score, 10 ;ganha pontos
             add food_left, -1
             .if food_left == 0 ;se as comidas acabarem
                 invoke gameOver
@@ -683,7 +778,7 @@ ret
 scareGhosts endp
 ;_____________________________________________________________________________
 ;verifica se o pac pegou uma pílula, e se for o caso chama o scareGhosts
-colideWithPill proc addrPill:dword
+colideWithPill proc uses eax addrPill:dword
 assume eax:ptr pill
     mov eax, addrPill
    
@@ -691,7 +786,6 @@ assume eax:ptr pill
         .if edx == TRUE
             mov [eax].pillObj.pos.x, -100
             mov [eax].pillObj.pos.y, -100
-            add score, 30 ;ganha pontos
             invoke scareGhosts
         .endif
 
@@ -722,20 +816,26 @@ gameManager proc p:dword
             invoke hitGhost, addr ghost4
 
             ;verifica se tocou nas comidas
-            invoke colideWithFood, addr food1
-            ;push eax
-            ;assume eax:ptr food
-            
-            ;mov eax, allFood.first
-            ;.while eax != 0
-            ;    invoke colideWithFood, eax
-            ;    mov eax, [eax].next
-            ;.endw
-            ;assume eax:nothing
-            ;pop eax
+            push eax
+            assume eax:ptr food
+            mov eax, map.first_food
+            .while eax != 0
+                invoke colideWithFood, eax
+                mov eax, [eax].next_food
+            .endw
+            assume eax:nothing
+            pop eax
 
             ;verifica se tocou nas pílulas
-            invoke colideWithPill, addr pill1
+            push eax
+            assume eax:ptr pill
+            mov eax, map.first_pill
+            .while eax != 0
+                invoke colideWithPill, eax
+                mov eax, [eax].next_pill
+            .endw
+            assume eax:nothing
+            pop eax
 
             ;move o player e os fantasmas
             invoke movePlayer
