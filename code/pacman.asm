@@ -153,29 +153,29 @@ paintBackground proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
 .if GAMESTATE == 0 ;tela de carregamento
     ;print "game state 0 yeah", 13,10
     invoke SelectObject, _hMemDC2, h_loading
-    invoke BitBlt, _hMemDC, 0, 0, 800, 600, _hMemDC2, 0, 0, SRCCOPY
+    invoke BitBlt, _hMemDC, 0, 0, 840, 960, _hMemDC2, 0, 0, SRCCOPY
 .endif
 
 .if GAMESTATE == 1 ;menu inicial
     ;print "game state1 yeah", 13,10
     invoke SelectObject, _hMemDC2, h_menu
-    invoke BitBlt, _hMemDC, 0, 0, 800, 600, _hMemDC2, 0, 0, SRCCOPY
+    invoke BitBlt, _hMemDC, 0, 0, 840, 960, _hMemDC2, 0, 0, SRCCOPY
 .endif
 
 .if GAMESTATE == 2 ;jogo em si
     ;print "game state2 yeah", 13,10
     invoke SelectObject, _hMemDC2, h_background
-    invoke BitBlt, _hMemDC, 0, 0, 800, 600, _hMemDC2, 0, 0, SRCCOPY
+    invoke BitBlt, _hMemDC, 0, 0, 840, 960, _hMemDC2, 0, 0, SRCCOPY
 .endif
 
 .if GAMESTATE == 3 ;perdeu
     invoke SelectObject, _hMemDC2, game_over
-    invoke BitBlt, _hMemDC, 0, 0, 800, 600, _hMemDC2, 0, 0, SRCCOPY
+    invoke BitBlt, _hMemDC, 0, 0, 840, 960, _hMemDC2, 0, 0, SRCCOPY
 .endif
 
 .if GAMESTATE == 4 ;ganhou
     invoke SelectObject, _hMemDC2, p_won
-    invoke BitBlt, _hMemDC, 0, 0, 800, 600, _hMemDC2, 0, 0, SRCCOPY
+    invoke BitBlt, _hMemDC, 0, 0, 840, 960, _hMemDC2, 0, 0, SRCCOPY
 .endif
 
     ret
@@ -342,10 +342,10 @@ paintMap proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
     invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food11.foodObj.pos
     invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food12.foodObj.pos
     invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food13.foodObj.pos
-    ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food14.foodObj.pos
-    ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food15.foodObj.pos
-    ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food16.foodObj.pos
-    ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food17.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food14.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food15.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food16.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food17.foodObj.pos
     ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food18.foodObj.pos
     ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food19.foodObj.pos
     ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food20.foodObj.pos
@@ -410,7 +410,7 @@ updateScreen proc
     .if GAMESTATE == 2 ;se o gamestate for o do jogo, desenha os objetos
         invoke paintMap, hDC, hMemDC, hMemDC2
         invoke paintPlayer, hDC, hMemDC, hMemDC2
-        invoke paintGhosts, hDC, hMemDC, hMemDC2
+        invoke paintGhosts, hDC, hMemDC, hMemDC2   
         invoke paintLifes, hDC, hMemDC, hMemDC2
     .endif
 
@@ -476,21 +476,6 @@ assume eax:ptr gameObject
 
 ret
 willCollide endp
-
-;______________________________________________________________________________
-;roda a variável de "próxima direção" de cada fantasma
-randomizeGhost proc uses eax addrGhost:dword 
-assume eax:ptr ghost
-    mov eax, addrGhost
-
-    .if [eax].random_dir < 3
-        add [eax].random_dir, 1
-    .elseif [eax].random_dir == 3
-        mov [eax].random_dir, 0
-    .endif
-
-    ret
-randomizeGhost endp
 ;______________________________________________________________________________
 ;função para um objeto n sair da tela, mas sim voltar pelo outro lado
 fixCoordinates proc addrObj:dword
@@ -512,6 +497,38 @@ assume eax:ptr gameObject
 assume eax:nothing
 ret
 fixCoordinates endp
+;______________________________________________________________________________
+;roda a variável de "próxima direção" de cada fantasma
+randomizeGhost proc uses eax addrGhost:dword 
+assume eax:ptr ghost
+    mov eax, addrGhost
+
+    .if [eax].random_dir < 3
+        add [eax].random_dir, 1
+    .elseif [eax].random_dir == 3
+        mov [eax].random_dir, 0
+    .endif
+
+    ret
+randomizeGhost endp
+;______________________________________________________________________________
+smartGhost proc uses eax addrGhost:dword 
+assume eax:ptr ghost
+    mov eax, addrGhost
+
+    mov bh, [eax].direction
+    .if [eax].random_dir == D_RIGHT || [eax].random_dir == D_LEFT
+        invoke randomizeGhost, eax
+        invoke willCollide, [eax].random_dir, addr [eax].ghostObj
+        .if edx == TRUE
+            
+        .endif
+    .endif
+
+
+
+ret
+smartGhost endp
 ;______________________________________________________________________________
 ;move o fantasma baseado na sua direção
 moveGhost proc uses eax ebx ecx addrGhost:dword
@@ -667,10 +684,10 @@ gameOver proc
     invoke reposition, addr food11.foodObj
     invoke reposition, addr food12.foodObj
     invoke reposition, addr food13.foodObj
-    ;invoke reposition, addr food14.foodObj
-    ;invoke reposition, addr food15.foodObj
-    ;invoke reposition, addr food16.foodObj
-    ;invoke reposition, addr food17.foodObj
+    invoke reposition, addr food14.foodObj
+    invoke reposition, addr food15.foodObj
+    invoke reposition, addr food16.foodObj
+    invoke reposition, addr food17.foodObj
     ;invoke reposition, addr food18.foodObj
     ;invoke reposition, addr food19.foodObj
     ;invoke reposition, addr food21.foodObj
@@ -709,7 +726,7 @@ gameOver proc
     invoke reposition, addr pill2.pillObj
     ;aqui
 
-    mov food_left, 13
+    mov food_left, 17
 
     ret
 gameOver endp
