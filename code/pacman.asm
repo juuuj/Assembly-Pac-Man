@@ -1,3 +1,4 @@
+
 ; http://win32assembly.programminghorizon.com/tut25.html
 ; http://win32assembly.programminghorizon.com/tut3.html
 
@@ -33,7 +34,7 @@ CommandLine LPSTR ?
 .CODE
 start: 
 
-    invoke  uFMOD_PlaySong,TEXT_("Speedball.xm"),0,XM_FILE
+    ;invoke  uFMOD_PlaySong,TEXT_("Speedball.xm"),0,XM_FILE
     ;invoke  uFMOD_PlaySong,0,0,0   comando para parar a musica 
     invoke GetModuleHandle, NULL             
                                             
@@ -346,14 +347,288 @@ paintMap proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
     invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food15.foodObj.pos
     invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food16.foodObj.pos
     invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food17.foodObj.pos
-    ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food18.foodObj.pos
-    ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food19.foodObj.pos
-    ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food20.foodObj.pos
-    ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food21.foodObj.pos
-    ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food22.foodObj.pos
-    ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food23.foodObj.pos
-    ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food24.foodObj.pos
-    ;aqui
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food18.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food19.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food20.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food21.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food22.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food23.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food24.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food25.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food26.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food27.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food28.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food29.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food30.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food31.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food32.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food33.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food34.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food35.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food36.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food37.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food38.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food39.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food40.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food41.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food42.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food43.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food44.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food45.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food46.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food47.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food48.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food49.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food50.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food51.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food52.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food53.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food54.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food55.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food56.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food57.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food58.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food59.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food60.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food61.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food62.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food63.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food64.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food65.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food66.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food67.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food68.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food69.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food70.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food71.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food72.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food73.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food74.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food75.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food76.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food77.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food78.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food79.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food80.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food81.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food82.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food83.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food84.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food85.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food86.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food87.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food88.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food89.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food90.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food91.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food92.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food93.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food94.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food95.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food96.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food97.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food98.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food99.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food100.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food101.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food102.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food103.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food104.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food105.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food106.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food107.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food108.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food109.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food110.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food111.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food112.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food113.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food114.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food115.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food116.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food117.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food118.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food119.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food120.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food121.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food122.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food123.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food124.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food125.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food126.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food127.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food128.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food129.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food130.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food131.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food132.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food133.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food134.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food135.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food136.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food137.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food138.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food139.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food140.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food141.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food142.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food143.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food144.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food145.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food146.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food147.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food148.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food149.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food150.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food151.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food152.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food153.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food154.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food155.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food156.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food157.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food158.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food159.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food160.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food161.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food162.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food163.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food164.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food165.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food166.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food167.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food168.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food169.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food170.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food171.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food172.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food173.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food174.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food175.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food176.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food177.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food178.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food179.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food180.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food181.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food182.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food183.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food184.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food185.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food186.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food187.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food188.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food189.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food190.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food191.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food192.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food193.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food194.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food195.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food196.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food197.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food198.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food199.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food200.foodObj.pos
+     invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food201.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food202.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food203.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food204.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food205.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food206.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food207.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food208.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food209.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food210.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food211.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food212.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food213.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food214.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food215.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food216.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food217.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food218.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food219.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food220.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food221.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food222.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food223.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food224.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food225.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food226.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food227.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food228.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food229.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food230.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food231.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food232.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food233.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food234.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food235.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food236.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food237.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food238.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food239.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food240.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food241.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food242.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food243.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food244.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food245.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food246.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food247.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food248.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food249.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food250.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food251.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food252.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food253.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food254.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food255.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food256.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food257.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food258.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food259.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food260.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food261.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food262.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food263.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food264.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food265.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food266.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food267.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food268.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food269.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food270.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food271.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food272.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food273.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food274.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food275.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food276.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food277.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food278.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food279.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food280.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food281.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food282.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food283.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food284.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food285.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food286.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food287.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food288.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food289.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food290.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food291.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food292.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food293.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food294.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food295.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food296.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food297.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food298.foodObj.pos
+    invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food299.foodObj.pos
 
     ;push eax
     ;assume eax:ptr food
@@ -450,13 +725,13 @@ assume eax:ptr gameObject
     mov tempPos.y, ebx
 
     .if direction == 0 ;right
-        add tempPos.x, 6
+        add tempPos.x, 8
     .elseif direction == 1 ;top
-        add tempPos.y, -6
+        add tempPos.y, -8
     .elseif direction == 2 ;left
-        add tempPos.x, -6
+        add tempPos.x, -8
     .elseif direction == 3 ;down
-        add tempPos.y, 6
+        add tempPos.y, 8
     .endif
 
     push eax
@@ -512,20 +787,61 @@ assume eax:ptr ghost
     ret
 randomizeGhost endp
 ;______________________________________________________________________________
-smartGhost proc uses eax addrGhost:dword 
+;armazena a próxima direção no ch e a direção oposta no cl
+getDirInfo proc dir:BYTE
+    mov ch, dir
+
+    .if ch < 3
+        add ch, 1
+    .elseif ch == 3
+        mov ch, 0
+    .endif
+
+    mov cl, ch
+    .if cl < 3
+        add cl, 1
+    .elseif cl == 3
+        mov cl, 0
+    .endif
+
+ret
+getDirInfo endp
+;______________________________________________________________________________
+smartGhost proc uses eax ebx addrGhost:dword 
 assume eax:ptr ghost
     mov eax, addrGhost
 
-    mov bh, [eax].direction
-    .if [eax].random_dir == D_RIGHT || [eax].random_dir == D_LEFT
-        invoke randomizeGhost, eax
-        invoke willCollide, [eax].random_dir, addr [eax].ghostObj
-        .if edx == TRUE
-            
+    mov bh, [eax].random_dir
+
+    .if [eax].direction == D_TOP || [eax].direction == D_DOWN
+        .if [eax].random_dir == D_RIGHT || [eax].random_dir == D_LEFT
+            invoke willCollide, [eax].random_dir, addr [eax].ghostObj
+            .if edx == TRUE
+                .if [eax].random_dir == D_LEFT
+                    mov [eax].direction, D_RIGHT
+                .else
+                    mov [eax].direction, D_LEFT
+                .endif
+            .else
+                mov bh, [eax].random_dir
+                mov [eax].direction, bh
+            .endif
+        .endif
+    .elseif [eax].direction == D_RIGHT || [eax].direction == D_LEFT
+        .if [eax].random_dir == D_DOWN || [eax].random_dir == D_TOP
+            invoke willCollide, [eax].random_dir, addr [eax].ghostObj
+            .if edx == TRUE
+                .if [eax].random_dir == D_TOP
+                    mov [eax].direction, D_DOWN
+                .else
+                    mov [eax].direction, D_TOP
+                .endif
+            .else
+                mov bh, [eax].random_dir
+                mov [eax].direction, bh
+            .endif
         .endif
     .endif
-
-
 
 ret
 smartGhost endp
@@ -550,11 +866,13 @@ moveGhost proc uses eax ebx ecx addrGhost:dword
             add [eax].ghostObj.pos.x,  -GHOST_SPEED
         .endif
     .else ;se o fantasma for colidir, muda a direção dele para a aleatória pré selecionada
-        mov bh, [eax].random_dir
-        mov [eax].direction, bh
+        ;mov bh, [eax].random_dir
+        ;mov [eax].direction, bh
+        invoke smartGhost, eax
     .endif
     invoke fixCoordinates, addr [eax].ghostObj
     invoke randomizeGhost, eax
+    ;invoke getDirInfo, [eax].direction
 
     assume eax:nothing
     ret
@@ -688,28 +1006,289 @@ gameOver proc
     invoke reposition, addr food15.foodObj
     invoke reposition, addr food16.foodObj
     invoke reposition, addr food17.foodObj
-    ;invoke reposition, addr food18.foodObj
-    ;invoke reposition, addr food19.foodObj
-    ;invoke reposition, addr food21.foodObj
-    ;invoke reposition, addr food22.foodObj
-    ;invoke reposition, addr food23.foodObj
-    ;invoke reposition, addr food24.foodObj
-    ;invoke reposition, addr food25.foodObj
-    ;invoke reposition, addr food26.foodObj
-    ;invoke reposition, addr food27.foodObj
-    ;invoke reposition, addr food28.foodObj
-    ;invoke reposition, addr food29.foodObj
-    ;invoke reposition, addr food30.foodObj
-    ;invoke reposition, addr food31.foodObj
-    ;invoke reposition, addr food32.foodObj
-    ;invoke reposition, addr food33.foodObj
-    ;invoke reposition, addr food34.foodObj
-    ;invoke reposition, addr food35.foodObj
-    ;invoke reposition, addr food36.foodObj
-    ;invoke reposition, addr food37.foodObj
-    ;invoke reposition, addr food38.foodObj
-    ;invoke reposition, addr food39.foodObj
-    ;invoke reposition, addr food40.foodObj
+    invoke reposition, addr food18.foodObj
+    invoke reposition, addr food19.foodObj
+    invoke reposition, addr food20.foodObj
+    invoke reposition, addr food21.foodObj
+    invoke reposition, addr food22.foodObj
+    invoke reposition, addr food23.foodObj
+    invoke reposition, addr food24.foodObj
+    invoke reposition, addr food25.foodObj
+    invoke reposition, addr food26.foodObj
+    invoke reposition, addr food27.foodObj
+    invoke reposition, addr food28.foodObj
+    invoke reposition, addr food29.foodObj
+    invoke reposition, addr food30.foodObj
+    invoke reposition, addr food31.foodObj
+    invoke reposition, addr food32.foodObj
+    invoke reposition, addr food33.foodObj
+    invoke reposition, addr food34.foodObj
+    invoke reposition, addr food35.foodObj
+    invoke reposition, addr food36.foodObj
+    invoke reposition, addr food37.foodObj
+    invoke reposition, addr food38.foodObj
+    invoke reposition, addr food39.foodObj
+    invoke reposition, addr food40.foodObj
+    invoke reposition, addr food41.foodObj
+    invoke reposition, addr food42.foodObj
+    invoke reposition, addr food43.foodObj
+    invoke reposition, addr food44.foodObj
+    invoke reposition, addr food45.foodObj
+    invoke reposition, addr food46.foodObj
+    invoke reposition, addr food47.foodObj
+    invoke reposition, addr food48.foodObj
+    invoke reposition, addr food49.foodObj
+    invoke reposition, addr food50.foodObj
+    invoke reposition, addr food51.foodObj
+    invoke reposition, addr food52.foodObj
+    invoke reposition, addr food53.foodObj
+    invoke reposition, addr food54.foodObj
+    invoke reposition, addr food55.foodObj
+    invoke reposition, addr food56.foodObj
+    invoke reposition, addr food57.foodObj
+    invoke reposition, addr food58.foodObj
+    invoke reposition, addr food59.foodObj
+    invoke reposition, addr food60.foodObj
+    invoke reposition, addr food61.foodObj
+    invoke reposition, addr food62.foodObj
+    invoke reposition, addr food63.foodObj
+    invoke reposition, addr food64.foodObj
+    invoke reposition, addr food65.foodObj
+    invoke reposition, addr food66.foodObj
+    invoke reposition, addr food67.foodObj
+    invoke reposition, addr food68.foodObj
+    invoke reposition, addr food69.foodObj
+    invoke reposition, addr food70.foodObj
+    invoke reposition, addr food71.foodObj
+    invoke reposition, addr food72.foodObj
+    invoke reposition, addr food73.foodObj
+    invoke reposition, addr food74.foodObj
+    invoke reposition, addr food75.foodObj
+    invoke reposition, addr food76.foodObj
+    invoke reposition, addr food77.foodObj
+    invoke reposition, addr food78.foodObj
+    invoke reposition, addr food79.foodObj
+    invoke reposition, addr food80.foodObj
+    invoke reposition, addr food81.foodObj
+    invoke reposition, addr food82.foodObj
+    invoke reposition, addr food83.foodObj
+    invoke reposition, addr food84.foodObj
+    invoke reposition, addr food85.foodObj
+    invoke reposition, addr food86.foodObj
+    invoke reposition, addr food87.foodObj
+    invoke reposition, addr food88.foodObj
+    invoke reposition, addr food89.foodObj
+    invoke reposition, addr food90.foodObj
+    invoke reposition, addr food91.foodObj
+    invoke reposition, addr food92.foodObj
+    invoke reposition, addr food93.foodObj
+    invoke reposition, addr food94.foodObj
+    invoke reposition, addr food95.foodObj
+    invoke reposition, addr food96.foodObj
+    invoke reposition, addr food97.foodObj
+    invoke reposition, addr food98.foodObj
+    invoke reposition, addr food99.foodObj
+    invoke reposition, addr food100.foodObj
+    invoke reposition, addr food101.foodObj
+    invoke reposition, addr food102.foodObj
+    invoke reposition, addr food103.foodObj
+    invoke reposition, addr food104.foodObj
+    invoke reposition, addr food105.foodObj
+    invoke reposition, addr food106.foodObj
+    invoke reposition, addr food107.foodObj
+    invoke reposition, addr food108.foodObj
+    invoke reposition, addr food109.foodObj
+    invoke reposition, addr food110.foodObj
+    invoke reposition, addr food111.foodObj
+    invoke reposition, addr food112.foodObj
+    invoke reposition, addr food113.foodObj
+    invoke reposition, addr food114.foodObj
+    invoke reposition, addr food115.foodObj
+    invoke reposition, addr food116.foodObj
+    invoke reposition, addr food117.foodObj
+    invoke reposition, addr food118.foodObj
+    invoke reposition, addr food119.foodObj
+    invoke reposition, addr food120.foodObj
+    invoke reposition, addr food121.foodObj
+    invoke reposition, addr food122.foodObj
+    invoke reposition, addr food123.foodObj
+    invoke reposition, addr food124.foodObj
+    invoke reposition, addr food125.foodObj
+    invoke reposition, addr food126.foodObj
+    invoke reposition, addr food127.foodObj
+    invoke reposition, addr food128.foodObj
+    invoke reposition, addr food129.foodObj
+    invoke reposition, addr food130.foodObj
+    invoke reposition, addr food131.foodObj
+    invoke reposition, addr food132.foodObj
+    invoke reposition, addr food133.foodObj
+    invoke reposition, addr food134.foodObj
+    invoke reposition, addr food135.foodObj
+    invoke reposition, addr food136.foodObj
+    invoke reposition, addr food137.foodObj
+    invoke reposition, addr food138.foodObj
+    invoke reposition, addr food139.foodObj
+    invoke reposition, addr food140.foodObj
+    invoke reposition, addr food141.foodObj
+    invoke reposition, addr food142.foodObj
+    invoke reposition, addr food143.foodObj
+    invoke reposition, addr food144.foodObj
+    invoke reposition, addr food145.foodObj
+    invoke reposition, addr food146.foodObj
+    invoke reposition, addr food147.foodObj
+    invoke reposition, addr food148.foodObj
+    invoke reposition, addr food149.foodObj
+    invoke reposition, addr food150.foodObj
+    invoke reposition, addr food151.foodObj
+    invoke reposition, addr food152.foodObj
+    invoke reposition, addr food153.foodObj
+    invoke reposition, addr food154.foodObj
+    invoke reposition, addr food155.foodObj
+    invoke reposition, addr food156.foodObj
+    invoke reposition, addr food157.foodObj
+    invoke reposition, addr food158.foodObj
+    invoke reposition, addr food159.foodObj
+    invoke reposition, addr food160.foodObj
+    invoke reposition, addr food161.foodObj
+    invoke reposition, addr food162.foodObj
+    invoke reposition, addr food163.foodObj
+    invoke reposition, addr food164.foodObj
+    invoke reposition, addr food165.foodObj
+    invoke reposition, addr food166.foodObj
+    invoke reposition, addr food167.foodObj
+    invoke reposition, addr food168.foodObj
+    invoke reposition, addr food169.foodObj
+    invoke reposition, addr food170.foodObj
+    invoke reposition, addr food171.foodObj
+    invoke reposition, addr food172.foodObj
+    invoke reposition, addr food173.foodObj
+    invoke reposition, addr food174.foodObj
+    invoke reposition, addr food175.foodObj
+    invoke reposition, addr food176.foodObj
+    invoke reposition, addr food177.foodObj
+    invoke reposition, addr food178.foodObj
+    invoke reposition, addr food179.foodObj
+    invoke reposition, addr food180.foodObj
+    invoke reposition, addr food181.foodObj
+    invoke reposition, addr food182.foodObj
+    invoke reposition, addr food183.foodObj
+    invoke reposition, addr food184.foodObj
+    invoke reposition, addr food185.foodObj
+    invoke reposition, addr food186.foodObj
+    invoke reposition, addr food187.foodObj
+    invoke reposition, addr food188.foodObj
+    invoke reposition, addr food189.foodObj
+    invoke reposition, addr food190.foodObj
+    invoke reposition, addr food191.foodObj
+    invoke reposition, addr food192.foodObj
+    invoke reposition, addr food193.foodObj
+    invoke reposition, addr food194.foodObj
+    invoke reposition, addr food195.foodObj
+    invoke reposition, addr food196.foodObj
+    invoke reposition, addr food197.foodObj
+    invoke reposition, addr food198.foodObj
+    invoke reposition, addr food199.foodObj
+    invoke reposition, addr food200.foodObj
+    invoke reposition, addr food201.foodObj
+    invoke reposition, addr food202.foodObj
+    invoke reposition, addr food203.foodObj
+    invoke reposition, addr food204.foodObj
+    invoke reposition, addr food205.foodObj
+    invoke reposition, addr food206.foodObj
+    invoke reposition, addr food207.foodObj
+    invoke reposition, addr food208.foodObj
+    invoke reposition, addr food209.foodObj
+    invoke reposition, addr food210.foodObj
+    invoke reposition, addr food211.foodObj
+    invoke reposition, addr food212.foodObj
+    invoke reposition, addr food213.foodObj
+    invoke reposition, addr food214.foodObj
+    invoke reposition, addr food215.foodObj
+    invoke reposition, addr food216.foodObj
+    invoke reposition, addr food217.foodObj
+    invoke reposition, addr food218.foodObj
+    invoke reposition, addr food219.foodObj
+    invoke reposition, addr food220.foodObj
+    invoke reposition, addr food221.foodObj
+    invoke reposition, addr food222.foodObj
+    invoke reposition, addr food223.foodObj
+    invoke reposition, addr food224.foodObj
+    invoke reposition, addr food225.foodObj
+    invoke reposition, addr food226.foodObj
+    invoke reposition, addr food227.foodObj
+    invoke reposition, addr food228.foodObj
+    invoke reposition, addr food229.foodObj
+    invoke reposition, addr food230.foodObj
+    invoke reposition, addr food231.foodObj
+    invoke reposition, addr food232.foodObj
+    invoke reposition, addr food233.foodObj
+    invoke reposition, addr food234.foodObj
+    invoke reposition, addr food235.foodObj
+    invoke reposition, addr food236.foodObj
+    invoke reposition, addr food237.foodObj
+    invoke reposition, addr food238.foodObj
+    invoke reposition, addr food239.foodObj
+    invoke reposition, addr food240.foodObj
+    invoke reposition, addr food241.foodObj
+    invoke reposition, addr food242.foodObj
+    invoke reposition, addr food243.foodObj
+    invoke reposition, addr food244.foodObj
+    invoke reposition, addr food245.foodObj
+    invoke reposition, addr food246.foodObj
+    invoke reposition, addr food247.foodObj
+    invoke reposition, addr food248.foodObj
+    invoke reposition, addr food249.foodObj
+    invoke reposition, addr food250.foodObj
+    invoke reposition, addr food251.foodObj
+    invoke reposition, addr food252.foodObj
+    invoke reposition, addr food253.foodObj
+    invoke reposition, addr food254.foodObj
+    invoke reposition, addr food255.foodObj
+    invoke reposition, addr food256.foodObj
+    invoke reposition, addr food257.foodObj
+    invoke reposition, addr food258.foodObj
+    invoke reposition, addr food259.foodObj
+    invoke reposition, addr food260.foodObj
+    invoke reposition, addr food261.foodObj
+    invoke reposition, addr food262.foodObj
+    invoke reposition, addr food263.foodObj
+    invoke reposition, addr food264.foodObj
+    invoke reposition, addr food265.foodObj
+    invoke reposition, addr food266.foodObj
+    invoke reposition, addr food267.foodObj
+    invoke reposition, addr food268.foodObj
+    invoke reposition, addr food269.foodObj
+    invoke reposition, addr food270.foodObj
+    invoke reposition, addr food271.foodObj
+    invoke reposition, addr food272.foodObj
+    invoke reposition, addr food273.foodObj
+    invoke reposition, addr food274.foodObj
+    invoke reposition, addr food275.foodObj
+    invoke reposition, addr food276.foodObj
+    invoke reposition, addr food277.foodObj
+    invoke reposition, addr food278.foodObj
+    invoke reposition, addr food279.foodObj
+    invoke reposition, addr food280.foodObj
+    invoke reposition, addr food281.foodObj
+    invoke reposition, addr food282.foodObj
+    invoke reposition, addr food283.foodObj
+    invoke reposition, addr food284.foodObj
+    invoke reposition, addr food285.foodObj
+    invoke reposition, addr food286.foodObj
+    invoke reposition, addr food287.foodObj
+    invoke reposition, addr food288.foodObj
+    invoke reposition, addr food289.foodObj
+    invoke reposition, addr food290.foodObj
+    invoke reposition, addr food291.foodObj
+    invoke reposition, addr food292.foodObj
+    invoke reposition, addr food293.foodObj
+    invoke reposition, addr food294.foodObj
+    invoke reposition, addr food295.foodObj
+    invoke reposition, addr food296.foodObj
+    invoke reposition, addr food297.foodObj
+    invoke reposition, addr food298.foodObj
+    invoke reposition, addr food299.foodObj
+
 
     ;aqui
 
