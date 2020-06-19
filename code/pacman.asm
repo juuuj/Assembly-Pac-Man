@@ -34,7 +34,7 @@ CommandLine LPSTR ?
 .CODE
 start: 
 
-    ;invoke  uFMOD_PlaySong,TEXT_("Speedball.xm"),0,XM_FILE
+    invoke  uFMOD_PlaySong,TEXT_("megalovania.xm"),0,XM_FILE
     ;invoke  uFMOD_PlaySong,0,0,0   comando para parar a musica 
     invoke GetModuleHandle, NULL             
                                             
