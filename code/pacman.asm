@@ -424,7 +424,6 @@ paintMap proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
     invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food92.foodObj.pos
     invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food93.foodObj.pos
     invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food94.foodObj.pos
-    ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food95.foodObj.pos
     invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food96.foodObj.pos
     invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food97.foodObj.pos
     invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food98.foodObj.pos
@@ -567,17 +566,6 @@ paintMap proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
     invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food298.foodObj.pos
     invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr food299.foodObj.pos
 
-    ;push eax
-    ;assume eax:ptr food
-    ;mov eax, map.first_food
-    ;.while [eax].next_food != 0
-        ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr [eax].foodObj.pos
-        ;mov eax, [eax].next
-        ;invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr [eax].foodObj.pos
-    ;.endw
-    ;assume eax:nothing
-    ;pop eax
-
     ;________PÍLULAS_________________________________________________________________
     invoke SelectObject, _hMemDC2, PILL_IMG
 
@@ -585,17 +573,6 @@ paintMap proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
     invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr pill2.pillObj.pos
     invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr pill3.pillObj.pos
     invoke paintPos, _hMemDC, _hMemDC2, addr FOOD_SIZE_POINT, addr pill4.pillObj.pos
-    ;aqui
-
-    ;push eax
-    ;assume eax:ptr pill
-    ;mov eax, map.first_pill 
-    ;.while eax != 0
-        ;invoke paintPos, _hMemDC, _hMemDC2, addr WALL_SIZE_POINT, addr [eax].pillObj.pos
-        ;mov eax, [eax].next_pill
-    ;.endw
-    ;assume eax:nothing
-    ;pop eax
 
     ret
 paintMap endp
@@ -1001,7 +978,7 @@ gameOver proc
     invoke reposition, addr food92.foodObj
     invoke reposition, addr food93.foodObj
     invoke reposition, addr food94.foodObj
-    ;invoke reposition, addr food95.foodObj
+    
     invoke reposition, addr food96.foodObj
     invoke reposition, addr food97.foodObj
     invoke reposition, addr food98.foodObj
@@ -1144,23 +1121,10 @@ gameOver proc
     invoke reposition, addr food298.foodObj
     invoke reposition, addr food299.foodObj
 
-
-    ;aqui
-
-    ;push eax
-    ;assume eax:ptr food
-    ;mov eax, allFood.first
-    ;.while eax != 0
-    ;    invoke reposition, addr [eax].foodObj
-    ;    mov eax, [eax].next
-    ;.endw
-    ;pop eax
-
     invoke reposition, addr pill1.pillObj
     invoke reposition, addr pill2.pillObj
     invoke reposition, addr pill3.pillObj
     invoke reposition, addr pill4.pillObj
-    ;aqui
 
     mov food_left, 234
 
@@ -1219,13 +1183,13 @@ colideWithFood endp
 scareGhosts proc
 
     mov ghost1.afraid, TRUE
-    mov ghost1.afraid_timer, 100
+    mov ghost1.afraid_timer, 140
     mov ghost2.afraid, TRUE
-    mov ghost2.afraid_timer, 100
+    mov ghost2.afraid_timer, 140
     mov ghost3.afraid, TRUE
-    mov ghost3.afraid_timer, 100
+    mov ghost3.afraid_timer, 140
     mov ghost4.afraid, TRUE
-    mov ghost4.afraid_timer, 100
+    mov ghost4.afraid_timer, 140
 
 ret
 scareGhosts endp
@@ -1425,19 +1389,15 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
     .ELSEIF uMsg == WM_KEYDOWN ;se o usuario apertou alguma tecla
 
         .if (wParam == 77h || wParam == 57h || wParam == VK_UP) ;w ou seta pra cima
-            print "cima", 13,10
             mov direction, D_TOP
 
         .elseif (wParam == 61h || wParam == 41h || wParam == VK_LEFT) ;a ou seta pra esquerda
-            print "esquerda", 13,10
             mov direction, D_LEFT
 
         .elseif (wParam == 73h || wParam == 53h || wParam == VK_DOWN) ;s ou seta pra baixo
-            print "baixo", 13,10
             mov direction, D_DOWN
 
         .elseif (wParam == 64h || wParam == 44h || wParam == VK_RIGHT) ;d ou seta pra direita
-            print "direita", 13,10
             mov direction, D_RIGHT
         .endif
 
